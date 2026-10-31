@@ -1,3 +1,5 @@
+param([switch]$Apk)
+
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 if (!(Test-Path '.git')) { throw 'Esta pasta precisa ser clonada do GitHub primeiro. Veja o README.' }
@@ -15,4 +17,9 @@ if (Test-Path -LiteralPath $routerTypes) {
 }
 npm run typecheck
 if ($LASTEXITCODE -ne 0) { throw 'A verificacao encontrou erros.' }
-node .\node_modules\expo\bin\cli start --dev-client --tunnel --clear
+if ($Apk) {
+    npx --yes eas-cli build --platform android --profile preview
+    if ($LASTEXITCODE -ne 0) { throw 'O build do APK nao foi concluido. Copie o link e o erro do EAS.' }
+} else {
+    node .\node_modules\expo\bin\cli start --dev-client --tunnel --clear
+}

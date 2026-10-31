@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text, View, Linking, Alert } from "react-native";
 import { Page, Button, ui } from "@/components/ui";
 const collections = [
@@ -28,16 +28,26 @@ const collections = [
     path: "pgp",
   },
 ];
+import ScriptureReader from "@/components/ScriptureReader";
 export default function LibraryScreen() {
+  const [reading, setReading] = useState<{ title: string; url: string } | null>(
+    null,
+  );
   return (
     <Page>
+      {reading && (
+        <ScriptureReader
+          title={reading.title}
+          url={reading.url}
+          onClose={() => setReading(null)}
+        />
+      )}
       <Text style={ui.eyebrow}>FONTES PARA SUA JORNADA</Text>
       <Text accessibilityRole="header" style={ui.title}>
         Abra as escrituras.
       </Text>
       <Text style={ui.body}>
-        Leia na Biblioteca do Evangelho ou no site oficial da Igreja, em
-        português.
+        As escrituras em português, com a fonte oficial sempre à vista.
       </Text>
       {collections.map((c) => (
         <View key={c.path} style={ui.card}>
@@ -45,24 +55,21 @@ export default function LibraryScreen() {
           <Text style={ui.body}>{c.description}</Text>
           <Button
             secondary
-            title="Abrir leitura ↗"
+            title="Ler no Vereda"
             onPress={() =>
-              Linking.openURL(
-                `https://www.churchofjesuschrist.org/study/scriptures/${c.path}?lang=por`,
-              ).catch(() =>
-                Alert.alert(
-                  "Não foi possível abrir",
-                  "Verifique sua conexão e tente novamente.",
-                ),
-              )
+              setReading({
+                title: c.title,
+                url: `https://www.churchofjesuschrist.org/study/scriptures/${c.path}?lang=por`,
+              })
             }
           />
         </View>
       ))}
       <Text style={ui.small}>
-        Os links abrem fora do Vereda. O site precisa de internet. As lições,
-        perguntas e reflexões salvas no Vereda funcionam offline. Entrar na
-        conta da Igreja no serviço oficial não sincroniza o progresso deste app.
+        A leitura integrada exibe o site oficial e precisa de internet. As
+        lições, perguntas e reflexões salvas no Vereda funcionam offline. Entrar
+        na conta da Igreja no serviço oficial não sincroniza o progresso deste
+        app.
       </Text>
     </Page>
   );

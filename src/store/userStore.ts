@@ -18,6 +18,7 @@ export interface UserState {
   gems: number;
   chaptersReadCount: number;
 
+  soundsEnabled: boolean;
   dailyGoal: number;
   lessonCompletions: Record<string, string>;
   studyDays: Record<string, string[]>;
@@ -50,6 +51,7 @@ const INITIAL_STATE = {
   gems: 0,
   chaptersReadCount: 0,
   notificationsEnabled: false,
+  soundsEnabled: true,
   dailyGoal: 1,
   lessonCompletions: {} as Record<string, string>,
   studyDays: {} as Record<string, string[]>,

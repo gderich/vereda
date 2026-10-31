@@ -9,11 +9,14 @@ const Renderer = require("react-test-renderer");
 const { act } = Renderer;
 const originalLoad = Module._load;
 let routeId = "semente";
+let hasNativeReader = false;
 const storage = new Map();
 Module._load = function (id, ...args) {
   if (id.startsWith("@/")) id = path.resolve(__dirname, "../src", id.slice(2));
   if (id === "react-native")
     return {
+      Modal: "Modal",
+      UIManager: { getViewManagerConfig: () => (hasNativeReader ? {} : null) },
       View: "View",
       Text: "Text",
       ScrollView: "ScrollView",
@@ -27,6 +30,10 @@ Module._load = function (id, ...args) {
       Share: { share: async () => {} },
       Platform: { OS: "android" },
     };
+  if (id === "expo-modules-core") return { NativeModulesProxy: {} };
+  if (id === "expo-web-browser")
+    return { openBrowserAsync: async () => ({ type: "dismiss" }) };
+  if (id === "react-native-webview") return { WebView: "WebView" };
   if (id === "react-native-safe-area-context")
     return { SafeAreaView: "View", SafeAreaProvider: "View" };
   if (id === "react-native-svg")
@@ -37,6 +44,10 @@ Module._load = function (id, ...args) {
       Circle: "Circle",
       Rect: "Rect",
       G: "G",
+      Defs: "Defs",
+      RadialGradient: "RadialGradient",
+      LinearGradient: "LinearGradient",
+      Stop: "Stop",
     };
   if (id === "@expo/vector-icons") return { Ionicons: "Icon" };
   if (id === "expo-router")
@@ -143,4 +154,51 @@ test("lesson retries wrong answers, saves reflection and completes exactly once"
       .some((n) => n.children.join("") === "+30 XP conquistados"),
   );
   act(() => tree.unmount());
+});
+test("integrated reader falls back without native module and returns to the lesson", () => {
+  const Screen = require("../app/lesson/[id].tsx").default;
+  let tree;
+  act(() => {
+    tree = Renderer.create(React.createElement(Screen));
+  });
+  act(() => button(tree, `Ler ${LESSONS[0].reference}`).props.onPress());
+  assert.ok(button(tree, "Abrir leitura"));
+  act(() => button(tree, "Voltar ao estudo").props.onPress());
+  assert.equal(tree.root.findAllByType("Modal").length, 0);
+  assert.ok(button(tree, "Já li · Vamos praticar"));
+  act(() => tree.unmount());
+});
+test("native reader handles failed loading, retry and limits embedded navigation", () => {
+  hasNativeReader = true;
+  delete require.cache[
+    require.resolve("../src/components/ScriptureReader.tsx")
+  ];
+  const Screen = require("../src/components/ScriptureReader.tsx").default;
+  let tree;
+  act(() => {
+    tree = Renderer.create(
+      React.createElement(Screen, {
+        url: "https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/32?lang=por",
+        title: "Alma 32",
+        onClose: () => {},
+      }),
+    );
+  });
+  const view = tree.root.findByType("WebView");
+  assert.equal(
+    view.props.onShouldStartLoadWithRequest({ url: "https://example.com" }),
+    false,
+  );
+  assert.equal(
+    view.props.onShouldStartLoadWithRequest({
+      url: "https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/33?lang=por",
+    }),
+    true,
+  );
+  act(() => view.props.onError());
+  assert.ok(button(tree, "Tentar novamente"));
+  act(() => button(tree, "Tentar novamente").props.onPress());
+  assert.ok(tree.root.findByType("WebView"));
+  act(() => tree.unmount());
+  hasNativeReader = false;
 });

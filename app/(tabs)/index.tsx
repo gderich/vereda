@@ -7,6 +7,7 @@ import { LESSONS } from "@/data/lessons";
 import { localDateKey } from "@/utils/date";
 import { Page, Button, Progress, ui, colors } from "@/components/ui";
 import PathArt from "@/components/PathArt";
+import BrandMark from "@/components/BrandMark";
 export default function HomeScreen() {
   const router = useRouter();
   const user = useUserStore();
@@ -23,18 +24,24 @@ export default function HomeScreen() {
   return (
     <Page>
       <View style={[ui.row, { justifyContent: "space-between" }]}>
-        <Text style={ui.eyebrow}>VEREDA</Text>
+        <View style={[ui.row, { gap: 8 }]}>
+          <View style={{ backgroundColor: colors.ink, borderRadius: 12 }}>
+            <BrandMark size={40} />
+          </View>
+          <Text style={ui.eyebrow}>VEREDA</Text>
+        </View>
         <Text style={{ color: colors.green, fontWeight: "700" }}>
           ☀ {streak} dias · {user.xp} XP
         </Text>
       </View>
       <View>
         <Text accessibilityRole="header" style={ui.title}>
-          Pequenos passos.{"\n"}Raízes profundas.
+          Luz para o seu{"\n"}próximo passo.
         </Text>
         <PathArt />
         <Text style={ui.body}>
-          Um momento para ler, aprender e levar a fé para o dia.
+          Leia com atenção. Aprenda com propósito. Leve uma pequena ação para o
+          seu dia.
         </Text>
       </View>
       <View style={ui.card}>
@@ -90,7 +97,12 @@ export default function HomeScreen() {
                 flexDirection: "row",
                 gap: 16,
                 alignItems: "center",
-                paddingVertical: 12,
+                padding: 16,
+                backgroundColor: colors.white,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor:
+                  next?.id === lesson.id ? colors.green : colors.line,
                 opacity: pressed ? 0.6 : 1,
               },
             ]}
@@ -128,7 +140,12 @@ export default function HomeScreen() {
                 {lesson.title}
               </Text>
               <Text style={ui.small}>
-                {lesson.reference} · {completed ? "Revisar" : "30 XP"}
+                {lesson.reference} ·{" "}
+                {completed
+                  ? "Concluída · Revisar"
+                  : next?.id === lesson.id
+                    ? "Seu próximo passo · 30 XP"
+                    : "30 XP"}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.muted} />

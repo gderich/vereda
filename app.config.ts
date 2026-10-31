@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Vereda',
   slug: 'vereda-daily-scripture',
-  version: '1.0.0',
+  version: '1.1.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   scheme: 'vereda',
@@ -12,7 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   splash: {
     image: './assets/images/splash-icon.png',
     resizeMode: 'contain',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#102D39',
   },
   updates: {
     fallbackToCacheTimeout: 0,
@@ -24,7 +24,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.vereda.app',
-    buildNumber: '1',
+    buildNumber: '2',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
       CFBundleLocalizations: ['pt'],
@@ -33,10 +33,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/images/adaptive-icon.png',
-      backgroundColor: '#216653',
+      backgroundColor: '#102D39',
     },
     package: 'com.vereda.app',
-    versionCode: 1,
+    versionCode: 2,
+    blockedPermissions: ['android.permission.RECORD_AUDIO'],
     permissions: [
       'android.permission.INTERNET',
       'android.permission.RECEIVE_BOOT_COMPLETED',
@@ -50,6 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
+    ['expo-av', { microphonePermission: false }],
     'expo-font',
     'expo-secure-store',
     [
@@ -64,11 +66,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-splash-screen',
       {
         image: './assets/images/splash-icon.png',
-        imageWidth: 150,
+        imageWidth: 220,
         resizeMode: 'contain',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#102D39',
         dark: {
-          backgroundColor: '#0F172A',
+          backgroundColor: '#102D39',
         },
       },
     ],

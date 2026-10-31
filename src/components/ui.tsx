@@ -2,10 +2,10 @@ import React from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 export const colors = {
   paper: "#F7F5EF",
-  ink: "#203D46",
+  ink: "#102D39",
   muted: "#57676B",
-  green: "#216653",
-  pale: "#E5EFE8",
+  green: "#245D64",
+  pale: "#E5EFED",
   gold: "#E9BC62",
   line: "#DCDDD4",
   white: "#FFFFFF",
@@ -13,7 +13,7 @@ export const colors = {
 export const ui = StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.paper },
   content: {
-    padding: 24,
+    padding: 20,
     paddingBottom: 40,
     gap: 20,
     width: "100%",
@@ -37,7 +37,7 @@ export const ui = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.white,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 20,
     gap: 12,
     borderWidth: 1,
@@ -56,7 +56,7 @@ export const ui = StyleSheet.create({
     minHeight: 52,
     alignItems: "center",
     borderBottomWidth: 4,
-    borderBottomColor: "#164638",
+    borderBottomColor: "#183F47",
   },
   buttonText: {
     color: colors.white,

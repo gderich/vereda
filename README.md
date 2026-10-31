@@ -2,6 +2,18 @@
 
 Aplicativo pessoal de acompanhamento de leitura das escrituras em português. Expo SDK 51, React Native 0.74.5, React 18.2, TypeScript e Expo Router. Sem login, backend, assinatura ou limite de leituras.
 
+## Versão 1.1 — uma vereda iluminada
+
+O símbolo agora é um caminho dourado guiado por um livro de escrituras iluminado, sobre azul profundo. SVGs editáveis e PNGs estão em `assets/images`; o mesmo desenho é usado no app, no ícone e na splash.
+
+- Leitura integrada em uma janela sobre a lição, plano ou biblioteca: exibe o site oficial, com carregamento, tentativa novamente e alternativa no navegador. Requer internet; não baixa nem redistribui o texto completo.
+- Os sons autorais de acerto, nova tentativa e conclusão estão em `assets/sounds`. Podem ser desligados na aba Progresso. São curtos, não pedem microfone e param quando o app vai para segundo plano.
+- Novos módulos nativos: `expo-av ~14.0.7` e `react-native-webview 13.8.6`, conforme a tabela de dependências do SDK 51 instalado. **Requer novo APK/development build** para habilitar sons e WebView. O build antigo usa a janela do navegador e permanece sem som.
+- Para gerar um APK completo: `git pull --ff-only`, depois `.\Atualizar.ps1 -Apk` no PowerShell. O EAS pode solicitar login; o APK sai pelo link do build, sem depender do PC para abrir.
+- A WebView mantém a fonte oficial visível e limita a navegação incorporada às páginas das escrituras. Login e outras páginas devem ser abertos no navegador; não há sincronização de contas.
+
+A leitura incorporada e o áudio foram verificados em testes com módulos nativos simulados e exportação Android. O comportamento real do site, do áudio e do build nativo ainda deve ser conferido no aparelho.
+
 ## Estado atual
 
 - Jornada Fundamentos com seis lições autorais: fé, luz, amor, serviço, sabedoria e caridade.
@@ -13,7 +25,7 @@ Aplicativo pessoal de acompanhamento de leitura das escrituras em português. Ex
 - Aba Escrituras com acesso às cinco coleções da Biblioteca do Evangelho.
 - Lembrete local às 19h e compartilhamento de um resumo de progresso.
 - Identidade própria em verde, creme e dourado; ilustração vetorial original de um caminho que nasce de um livro.
-- **Não é um leitor offline integral.** Lições, perguntas e reflexões funcionam offline, mas o texto completo abre no serviço oficial. A edição bíblica exibida é a da fonte externa.
+- **Não é um leitor offline integral.** Lições, perguntas e reflexões funcionam offline, mas o texto completo é exibido a partir do serviço oficial. A edição bíblica exibida é a da fonte externa.
 - Sem sincronização com a conta da Igreja. Não foi encontrada uma integração pública documentada para autenticação e sincronização de progresso de terceiros.
 - O ícone e a splash novos aparecem no próximo build nativo. As telas mudam ao atualizar o JavaScript.
 

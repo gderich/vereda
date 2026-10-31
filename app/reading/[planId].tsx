@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,7 +9,10 @@ import { getBook } from '@/data/books';
 import { chapterUrl } from '@/data/scriptureLinks';
 import { Button } from '@/components/ui';
 
+import ScriptureReader from '@/components/ScriptureReader';
+import { playSound } from '@/services/sounds';
 export default function ReadingPlanScreen() {
+  const [reading,setReading]=useState(false);
   const params = useLocalSearchParams<{ planId: string }>();
   const planId = Array.isArray(params.planId) ? params.planId[0] : params.planId;
   const router = useRouter();
@@ -22,11 +25,13 @@ export default function ReadingPlanScreen() {
     const result = completeChapter(plan.id, next.bookId, next.chapter);
     if (!result.awarded) return;
     const user = useUserStore.getState();
+    void playSound('complete');
     user.markChapterRead(next.bookId, next.chapter);
     user.addXP(plan.xpPerChapter + (result.finished ? plan.bonusXpOnComplete : 0));
     if (result.finished) Alert.alert('Plano concluído!', `Você recebeu ${plan.bonusXpOnComplete} XP de bônus.`);
   }
   return <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    {reading && next && chapterUrl(next.bookId,next.chapter) && <ScriptureReader url={chapterUrl(next.bookId,next.chapter)!} title={`${getBook(next.bookId)?.name} ${next.chapter}`} onClose={()=>setReading(false)}/>}
     <View style={styles.header}>
       <TouchableOpacity accessibilityRole="button" style={styles.backButton} onPress={() => router.replace('/')}><Text style={styles.backText}>← Início</Text></TouchableOpacity>
       <Text style={styles.planName}>Leitura</Text>
@@ -38,7 +43,7 @@ export default function ReadingPlanScreen() {
         {next ? <>
           <Text style={styles.planName}>{getBook(next.bookId)?.name} · Capítulo {next.chapter}</Text>
           <Text style={styles.verseText}>Leia o capítulo na fonte oficial ou no seu exemplar. Depois, volte aqui para registrar seu progresso.</Text>
-          <Button secondary title="Abrir capítulo nas escrituras ↗" onPress={() => { const url=chapterUrl(next.bookId,next.chapter); if(url) Linking.openURL(url).catch(()=>Alert.alert('Não foi possível abrir','Verifique sua conexão e tente novamente.')); else Alert.alert('Referência indisponível','Abra a coleção pela aba Escrituras.'); }} />
+          <Button secondary title="Ler capítulo no Vereda" onPress={() => setReading(true)} />
           <TouchableOpacity accessibilityRole="button" style={styles.completeButton} onPress={() => Alert.alert(
             'Registrar leitura', 'Você terminou a leitura deste capítulo?',
             [{ text: 'Ainda não', style: 'cancel' }, { text: 'Sim, concluí', onPress: finishChapter }],

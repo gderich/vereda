@@ -8,6 +8,7 @@ import {
   disableDailyReminder,
 } from "@/services/notifications";
 import { Page, Button, Progress, ui, colors } from "@/components/ui";
+import { soundsAvailable, playSound, stopSounds } from "@/services/sounds";
 export default function ProgressScreen() {
   const user = useUserStore();
   const [busy, setBusy] = useState(false);
@@ -144,6 +145,40 @@ export default function ProgressScreen() {
             />
           </View>
         ))}
+      </View>
+      <View style={ui.card}>
+        <Text style={ui.heading}>Sons do estudo</Text>
+        <Text style={ui.body}>
+          Notas suaves para acertos, novas tentativas e conclusão. Sem música
+          contínua.
+        </Text>
+        <Button
+          secondary
+          title={
+            user.soundsEnabled
+              ? "Sons ativados · Desligar"
+              : "Sons desativados · Ligar"
+          }
+          onPress={() => {
+            const enabled = !user.soundsEnabled;
+            useUserStore.setState({ soundsEnabled: enabled });
+            if (enabled) void playSound("correct");
+            else void stopSounds();
+          }}
+        />
+        {soundsAvailable() ? (
+          <Button
+            secondary
+            disabled={!user.soundsEnabled}
+            title="Ouvir exemplo"
+            onPress={() => void playSound("complete")}
+          />
+        ) : (
+          <Text style={ui.small}>
+            Os sons estarão disponíveis depois de instalar a nova versão do
+            aplicativo.
+          </Text>
+        )}
       </View>
       <Text accessibilityRole="header" style={ui.heading}>
         Conquistas

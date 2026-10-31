@@ -1,14 +1,20 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, AppState } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useUserStore } from '@/store/userStore';
 import { usePlanStore } from '@/store/planStore';
 
+import { stopSounds } from '@/services/sounds';
+
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', state => { if (state !== 'active') void stopSounds(); });
+    return () => { subscription.remove(); void stopSounds(); };
+  }, []);
   useEffect(() => {
     SplashScreen.hideAsync().catch(console.warn);
     let mounted = true;

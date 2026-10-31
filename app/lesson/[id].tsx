@@ -1,15 +1,18 @@
 import React, { useState } from "react";
-import { Text, View, TextInput, Pressable, Alert, Linking } from "react-native";
+import { Text, View, TextInput, Pressable, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { getLesson, scriptureUrl } from "@/data/lessons";
 import { useUserStore } from "@/store/userStore";
 import { Page, Button, Progress, ui, colors } from "@/components/ui";
 import PathArt from "@/components/PathArt";
+import ScriptureReader from "@/components/ScriptureReader";
+import { playSound } from "@/services/sounds";
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const lesson = getLesson(id);
   const router = useRouter();
   const user = useUserStore();
+  const [reading, setReading] = useState(false);
   const [step, setStep] = useState(-1);
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
@@ -38,6 +41,13 @@ export default function LessonScreen() {
   }
   return (
     <Page>
+      {reading && (
+        <ScriptureReader
+          url={scriptureUrl(lesson.path)}
+          title={lesson.reference}
+          onClose={() => setReading(false)}
+        />
+      )}
       <Button secondary title="Voltar à jornada" onPress={exit} />
       <Text style={ui.eyebrow}>{lesson.reference.toUpperCase()}</Text>
       <Progress
@@ -61,19 +71,12 @@ export default function LessonScreen() {
           </View>
           <Button
             secondary
-            title={`Ler ${lesson.reference} ↗`}
-            onPress={() =>
-              Linking.openURL(scriptureUrl(lesson.path)).catch(() =>
-                Alert.alert(
-                  "Não foi possível abrir",
-                  "Verifique a conexão e tente novamente.",
-                ),
-              )
-            }
+            title={`Ler ${lesson.reference}`}
+            onPress={() => setReading(true)}
           />
           <Text style={ui.small}>
-            O link abre o site ou a Biblioteca do Evangelho. A leitura no site
-            precisa de internet.
+            A leitura abre sobre a lição. Você volta ao mesmo ponto quando
+            terminar. É necessário estar online.
           </Text>
           <Button title="Já li · Vamos praticar" onPress={() => setStep(0)} />
         </>
@@ -101,8 +104,10 @@ export default function LessonScreen() {
               title="Concluir lição"
               onPress={() => {
                 const result = user.finishLesson(id, answers);
-                if (result.completed) setReward(result.xp);
-                else
+                if (result.completed) {
+                  setReward(result.xp);
+                  void playSound("complete");
+                } else
                   Alert.alert(
                     "Revise as respostas",
                     "Volte à jornada e refaça a lição.",
@@ -185,8 +190,12 @@ export default function LessonScreen() {
                   : "Tentar novamente"
             }
             onPress={() => {
-              if (!checked) setChecked(true);
-              else if (selected === question.answer) {
+              if (!checked) {
+                setChecked(true);
+                void playSound(
+                  selected === question.answer ? "correct" : "retry",
+                );
+              } else if (selected === question.answer) {
                 setAnswers([...answers, selected]);
                 setStep(step + 1);
                 setSelected(null);
