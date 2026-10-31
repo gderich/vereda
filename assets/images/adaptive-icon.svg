@@ -1,0 +1,39 @@
+<svg viewBox="0 0 432 432" xmlns="http://www.w3.org/2000/svg">
+  <!-- Foreground para Android Adaptive Icon (safe zone: 192x192 center) -->
+  <!-- Caminho/vereda dourada -->
+  <path d="M216 420
+           Q 160 250 110 150
+           Q 135 100 216 60
+           Q 297 100 322 150
+           Q 272 250 216 420"
+        fill="#C49A2B"/>
+
+  <!-- Brilho no caminho -->
+  <path d="M216 420
+           Q 180 280 200 180
+           Q 210 150 216 60"
+        fill="none" stroke="#F59E0B" strokeWidth="6" strokeLinecap="round" opacity="0.5"/>
+
+  <!-- Livro aberto no final do caminho -->
+  <g transform="translate(176, 20)">
+    <!-- Página esquerda -->
+    <path d="M40 0 L0 0 L0 40 Q0 48 8 48 L32 48 Q40 48 40 40 Z" fill="#FFFFFF"/>
+    <!-- Página direita -->
+    <path d="M40 0 L80 0 Q56 16 40 32 Z" fill="#F0F4F8"/>
+    <!-- Linhas de texto esquerda -->
+    <rect x="8" y="12" width="24" height="2" fill="#1E3A5F" rx="1"/>
+    <rect x="8" y="17" width="18" height="1.5" fill="#1E3A5F" rx="0.75"/>
+    <rect x="8" y="22" width="21" height="1.5" fill="#1E3A5F" rx="0.75"/>
+    <rect x="8" y="27" width="15" height="1.5" fill="#1E3A5F" rx="0.75"/>
+    <!-- Linhas de texto direita -->
+    <rect x="48" y="12" width="24" height="2" fill="#64748B" rx="1"/>
+    <rect x="48" y="17" width="18" height="1.5" fill="#64748B" rx="0.75"/>
+    <rect x="48" y="22" width="21" height="1.5" fill="#64748B" rx="0.75"/>
+  </g>
+
+  <!-- Streak fire -->
+  <g transform="translate(330, 40)">
+    <path d="M10 30 Q15 20 10 10 Q5 20 10 30" fill="#F59E0B"/>
+    <path d="M10 28 Q12 22 10 16 Q8 22 10 28" fill="#FEF3C7"/>
+  </g>
+</svg>

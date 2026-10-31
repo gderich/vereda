@@ -1,0 +1,40 @@
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circular -->
+  <circle cx="512" cy="512" r="500" fill="#1E3A5F"/>
+
+  <!-- Caminho/vereda dourada em perspectiva -->
+  <path d="M512 980
+           Q 400 600 320 400
+           Q 380 300 512 200
+           Q 644 300 704 400
+           Q 624 600 512 980"
+        fill="#C49A2B" opacity="0.95"/>
+
+  <!-- Brilho no caminho -->
+  <path d="M512 980
+           Q 440 650 480 450
+           Q 500 400 512 200"
+        fill="none" stroke="#F59E0B" strokeWidth="8" strokeLinecap="round" opacity="0.5"/>
+
+  <!-- Livro aberto estilizado no final do caminho -->
+  <g transform="translate(440, 140)">
+    <!-- Página esquerda -->
+    <path d="M80 0 L0 0 L0 80 Q0 96 16 96 L64 96 Q80 96 80 80 Z" fill="#FFFFFF"/>
+    <!-- Página direita -->
+    <path d="M80 0 L160 0 Q112 32 80 64 Z" fill="#F0F4F8"/>
+    <!-- Linhas de texto -->
+    <rect x="16" y="24" width="48" height="4" fill="#1E3A5F" rx="2"/>
+    <rect x="16" y="34" width="36" height="3" fill="#1E3A5F" rx="1.5"/>
+    <rect x="16" y="44" width="42" height="3" fill="#1E3A5F" rx="1.5"/>
+    <rect x="16" y="54" width="30" height="3" fill="#1E3A5F" rx="1.5"/>
+    <rect x="96" y="24" width="48" height="4" fill="#64748B" rx="2"/>
+    <rect x="96" y="34" width="36" height="3" fill="#64748B" rx="1.5"/>
+    <rect x="96" y="44" width="42" height="3" fill="#64748B" rx="1.5"/>
+  </g>
+
+  <!-- Streak fire pequeno no canto -->
+  <g transform="translate(660, 160)">
+    <path d="M20 60 Q30 40 20 20 Q10 40 20 60" fill="#F59E0B"/>
+    <path d="M20 56 Q24 44 20 32 Q16 44 20 56" fill="#FEF3C7"/>
+  </g>
+</svg>
