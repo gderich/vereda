@@ -29,6 +29,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="reading/[planId]" />
+        <Stack.Screen name="lesson/[id]" />
       </Stack>
     </SafeAreaView> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
       {failed ? <Text>Não foi possível carregar o progresso. Feche e abra o aplicativo novamente. Seus dados não foram apagados.</Text> : <ActivityIndicator />}

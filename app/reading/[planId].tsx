@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/store/userStore';
 import { usePlanStore } from '@/store/planStore';
 import { getPlan, getNextChapter, calculatePlanProgress } from '@/data/plans';
 import { getBook } from '@/data/books';
+import { chapterUrl } from '@/data/scriptureLinks';
+import { Button } from '@/components/ui';
 
 export default function ReadingPlanScreen() {
   const params = useLocalSearchParams<{ planId: string }>();
@@ -35,9 +37,10 @@ export default function ReadingPlanScreen() {
         <Text style={styles.bookProgressText}>{calculatePlanProgress(plan, progress?.completedChapters ?? [])}% concluído</Text>
         {next ? <>
           <Text style={styles.planName}>{getBook(next.bookId)?.name} · Capítulo {next.chapter}</Text>
-          <Text style={styles.verseText}>O texto deste capítulo ainda não está disponível no aplicativo. Leia no seu exemplar das escrituras e registre a conclusão abaixo.</Text>
+          <Text style={styles.verseText}>Leia o capítulo na fonte oficial ou no seu exemplar. Depois, volte aqui para registrar seu progresso.</Text>
+          <Button secondary title="Abrir capítulo nas escrituras ↗" onPress={() => { const url=chapterUrl(next.bookId,next.chapter); if(url) Linking.openURL(url).catch(()=>Alert.alert('Não foi possível abrir','Verifique sua conexão e tente novamente.')); else Alert.alert('Referência indisponível','Abra a coleção pela aba Escrituras.'); }} />
           <TouchableOpacity accessibilityRole="button" style={styles.completeButton} onPress={() => Alert.alert(
-            'Registrar leitura', 'Você terminou a leitura deste capítulo no seu exemplar?',
+            'Registrar leitura', 'Você terminou a leitura deste capítulo?',
             [{ text: 'Ainda não', style: 'cancel' }, { text: 'Sim, concluí', onPress: finishChapter }],
           )}><Text style={styles.completeButtonText}>Registrar capítulo lido (+{plan.xpPerChapter} XP)</Text></TouchableOpacity>
         </> : <Text style={styles.modalTitle}>Plano concluído!</Text>}
@@ -49,7 +52,7 @@ export default function ReadingPlanScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F7F5EF',
   },
   header: {
     flexDirection: 'row',
@@ -59,13 +62,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: '#DCDDD4',
   },
   backButton: {
     padding: 8,
   },
   backText: {
-    color: '#1E3A5F',
+    color: '#216653',
     fontWeight: '600',
   },
   headerCenter: {
@@ -75,7 +78,7 @@ const styles = StyleSheet.create({
   planName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#0F172A',
+    color: '#203D46',
   },
   streakBadge: {
     backgroundColor: '#FEF3C7',
@@ -93,23 +96,23 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: '#DCDDD4',
   },
   bookProgressBg: {
     height: 6,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#DCDDD4',
     borderRadius: 3,
     overflow: 'hidden',
     marginBottom: 8,
   },
   bookProgressBar: {
     height: '100%',
-    backgroundColor: '#1E3A5F',
+    backgroundColor: '#216653',
     borderRadius: 3,
   },
   bookProgressText: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#57676B',
     textAlign: 'center',
   },
   reader: {
@@ -123,11 +126,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: '#DCDDD4',
   },
   bookName: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#57676B',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 4,
@@ -135,7 +138,7 @@ const styles = StyleSheet.create({
   chapterNumber: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#0F172A',
+    color: '#203D46',
   },
   verses: {
     padding: 16,
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
   verseNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1E3A5F',
+    color: '#216653',
     marginBottom: 4,
   },
   verseText: {
@@ -169,10 +172,10 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: '#DCDDD4',
   },
   completeButton: {
-    backgroundColor: '#1E3A5F',
+    backgroundColor: '#216653',
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
@@ -211,7 +214,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#0F172A',
+    color: '#203D46',
     marginBottom: 12,
     textAlign: 'center',
   },
@@ -223,7 +226,7 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: 'bold',
-    color: '#1E3A5F',
+    color: '#216653',
   },
   modalXP: {
     fontSize: 18,
@@ -232,7 +235,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   modalButton: {
-    backgroundColor: '#1E3A5F',
+    backgroundColor: '#216653',
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 32,

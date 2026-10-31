@@ -1,7 +1,8 @@
-import { localDateKey } from '../utils/date';
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getLesson } from "../data/lessons";
+import { localDateKey } from "../utils/date";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface UserState {
   // Profile
@@ -17,6 +18,17 @@ export interface UserState {
   gems: number;
   chaptersReadCount: number;
 
+  dailyGoal: number;
+  lessonCompletions: Record<string, string>;
+  studyDays: Record<string, string[]>;
+  reflections: Record<string, string>;
+  setDailyGoal: (goal: number) => void;
+  saveReflection: (id: string, text: string) => void;
+  finishLesson: (
+    id: string,
+    answers: number[],
+  ) => { completed: boolean; xp: number };
+
   // Settings
   notificationsEnabled: boolean;
 
@@ -28,7 +40,7 @@ export interface UserState {
 }
 
 const INITIAL_STATE = {
-  name: 'Discípulo',
+  name: "Discípulo",
   createdAt: new Date().toISOString(),
   xp: 0,
   level: 1,
@@ -38,6 +50,10 @@ const INITIAL_STATE = {
   gems: 0,
   chaptersReadCount: 0,
   notificationsEnabled: false,
+  dailyGoal: 1,
+  lessonCompletions: {} as Record<string, string>,
+  studyDays: {} as Record<string, string[]>,
+  reflections: {} as Record<string, string>,
 };
 
 export const useUserStore = create<UserState>()(
@@ -45,6 +61,52 @@ export const useUserStore = create<UserState>()(
     (set, get) => ({
       ...INITIAL_STATE,
 
+      setDailyGoal: (goal) => {
+        if ([1, 2, 3].includes(goal)) set({ dailyGoal: goal });
+      },
+      saveReflection: (id, text) => {
+        if (getLesson(id))
+          set({
+            reflections: { ...get().reflections, [id]: text.slice(0, 2000) },
+          });
+      },
+      finishLesson: (id, answers) => {
+        const lesson = getLesson(id);
+        if (
+          !lesson ||
+          answers.length !== lesson.questions.length ||
+          lesson.questions.some((q, i) => q.answer !== answers[i])
+        )
+          return { completed: false, xp: 0 };
+        const state = get();
+        const today = localDateKey(new Date());
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const xp = state.lessonCompletions[id] ? 0 : 30;
+        const streak =
+          state.lastReadDate === today
+            ? state.streakDays
+            : state.lastReadDate === localDateKey(yesterday)
+              ? state.streakDays + 1
+              : 1;
+        const total = state.xp + xp;
+        set({
+          xp: total,
+          level: Math.floor(total / 200) + 1,
+          lessonCompletions: {
+            ...state.lessonCompletions,
+            [id]: state.lessonCompletions[id] || today,
+          },
+          studyDays: {
+            ...state.studyDays,
+            [today]: [...new Set([...(state.studyDays[today] || []), id])],
+          },
+          streakDays: streak,
+          maxStreak: Math.max(state.maxStreak, streak),
+          lastReadDate: today,
+        });
+        return { completed: true, xp };
+      },
       addXP: (amount: number) => {
         const currentXP = get().xp + amount;
         set({ xp: currentXP, level: Math.floor(currentXP / 200) + 1 });
@@ -75,8 +137,6 @@ export const useUserStore = create<UserState>()(
           maxStreak,
           lastReadDate: today,
         });
-
-
       },
 
       addGems: (amount: number) => {
@@ -91,8 +151,8 @@ export const useUserStore = create<UserState>()(
       },
     }),
     {
-      name: 'vereda-user-storage',
+      name: "vereda-user-storage",
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );

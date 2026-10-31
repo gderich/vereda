@@ -1,70 +1,145 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useUserStore } from '@/store/userStore';
-import { usePlanStore } from '@/store/planStore';
-import { getPlan, getNextChapter, calculatePlanProgress } from '@/data/plans';
-import { getBook } from '@/data/books';
-import { enableDailyReminder, disableDailyReminder } from '@/services/notifications';
-import { localDateKey } from '@/utils/date';
-
+import React from "react";
+import { Text, View, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useUserStore } from "@/store/userStore";
+import { LESSONS } from "@/data/lessons";
+import { localDateKey } from "@/utils/date";
+import { Page, Button, Progress, ui, colors } from "@/components/ui";
+import PathArt from "@/components/PathArt";
 export default function HomeScreen() {
   const router = useRouter();
   const user = useUserStore();
-  const { activePlanId, userPlans, setActivePlan } = usePlanStore();
-  const [busy, setBusy] = useState(false);
-  const plan = getPlan(activePlanId ?? 'bom-completo');
-  const completed = plan ? userPlans[plan.id]?.completedChapters ?? [] : [];
-  const next = plan ? getNextChapter(plan, completed) : null;
-  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-  const streak = user.lastReadDate === localDateKey(new Date()) || user.lastReadDate === localDateKey(yesterday) ? user.streakDays : 0;
-  async function toggleReminder() {
-    setBusy(true);
-    try {
-      if (user.notificationsEnabled) {
-        await disableDailyReminder();
-        useUserStore.setState({ notificationsEnabled: false });
-      } else {
-        const enabled = await enableDailyReminder();
-        useUserStore.setState({ notificationsEnabled: enabled });
-        if (!enabled) Alert.alert('Permissão necessária', 'Ative as notificações nas configurações do celular para receber o lembrete.');
-      }
-    } catch { Alert.alert('Não foi possível configurar', 'Tente novamente nas configurações de notificações do celular.'); }
-    finally { setBusy(false); }
-  }
-  return <ScrollView style={styles.page} contentContainerStyle={styles.content}>
-    <Text style={styles.eyebrow}>VEREDA · LEITURA DIÁRIA</Text>
-    <Text style={styles.title}>Um capítulo de cada vez.</Text>
-    <Text style={styles.muted}>Seu progresso fica salvo neste celular.</Text>
-    <View style={styles.stats}>
-      <Text style={styles.stat}>{streak} dias seguidos</Text>
-      <Text style={styles.stat}>{user.xp} XP · Nível {user.level}</Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.eyebrow}>SEU PLANO</Text>
-      <Text style={styles.heading}>{plan?.name ?? 'Escolha um plano'}</Text>
-      {plan && <Text style={styles.muted}>{calculatePlanProgress(plan, completed)}% concluído</Text>}
-      {next && <Text style={styles.chapter}>{getBook(next.bookId)?.name} {next.chapter}</Text>}
-      <Pressable accessibilityRole="button" style={styles.button} onPress={() => {
-        if (plan) { setActivePlan(plan.id); router.push({ pathname: '/reading/[planId]', params: { planId: plan.id } }); }
-        else router.push('/plans');
-      }}><Text style={styles.buttonText}>{next ? 'Continuar leitura' : 'Ver plano'}</Text></Pressable>
-      <Pressable accessibilityRole="button" style={styles.link} onPress={() => router.push('/plans')}><Text style={styles.linkText}>Escolher outro plano</Text></Pressable>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.heading}>Lembrete diário</Text>
-      <Text style={styles.muted}>Às 19h, no horário local do aparelho.</Text>
-      <Pressable accessibilityRole="button" disabled={busy} style={styles.link} onPress={toggleReminder}><Text style={styles.linkText}>{busy ? 'Configurando…' : user.notificationsEnabled ? 'Desativar lembrete' : 'Ativar lembrete'}</Text></Pressable>
-    </View>
-    <Text style={styles.notice}>Os textos completos das escrituras ainda não estão incluídos nesta versão. Você pode acompanhar aqui a leitura feita no seu exemplar.</Text>
-  </ScrollView>;
+  const done = Object.keys(user.lessonCompletions).length;
+  const next = LESSONS.find((l) => !user.lessonCompletions[l.id]);
+  const today = (user.studyDays[localDateKey(new Date())] || []).length;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const streak = [localDateKey(new Date()), localDateKey(yesterday)].includes(
+    user.lastReadDate || "",
+  )
+    ? user.streakDays
+    : 0;
+  return (
+    <Page>
+      <View style={[ui.row, { justifyContent: "space-between" }]}>
+        <Text style={ui.eyebrow}>VEREDA</Text>
+        <Text style={{ color: colors.green, fontWeight: "700" }}>
+          ☀ {streak} dias · {user.xp} XP
+        </Text>
+      </View>
+      <View>
+        <Text accessibilityRole="header" style={ui.title}>
+          Pequenos passos.{"\n"}Raízes profundas.
+        </Text>
+        <PathArt />
+        <Text style={ui.body}>
+          Um momento para ler, aprender e levar a fé para o dia.
+        </Text>
+      </View>
+      <View style={ui.card}>
+        <View style={[ui.row, { justifyContent: "space-between" }]}>
+          <Text style={ui.heading}>
+            {today >= user.dailyGoal
+              ? "Meta alcançada!"
+              : "Seu momento de hoje"}
+          </Text>
+          <Text style={ui.small}>
+            {Math.min(today, user.dailyGoal)}/{user.dailyGoal} lições
+          </Text>
+        </View>
+        <Progress value={today / user.dailyGoal} label="Meta diária" />
+        <Text style={ui.small}>
+          Uma lição diferente por marcação. Revisar também conta para a meta.
+        </Text>
+        <Button
+          title={next ? `Começar · ${next.title}` : "Revisar a jornada"}
+          onPress={() =>
+            router.push({
+              pathname: "/lesson/[id]",
+              params: { id: next?.id || LESSONS[0].id },
+            })
+          }
+        />
+      </View>
+      <View>
+        <Text style={ui.eyebrow}>JORNADA 01 · FUNDAMENTOS</Text>
+        <Text accessibilityRole="header" style={[ui.heading, { marginTop: 8 }]}>
+          Aprender e viver
+        </Text>
+        <Text style={ui.small}>
+          {done} de {LESSONS.length} lições concluídas · Sem pressa, sem perder
+          vidas.
+        </Text>
+      </View>
+      {LESSONS.map((lesson, i) => {
+        const completed = !!user.lessonCompletions[lesson.id];
+        return (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${lesson.title}. ${completed ? "Concluída. Revisar" : "Começar lição"}`}
+            key={lesson.id}
+            onPress={() =>
+              router.push({
+                pathname: "/lesson/[id]",
+                params: { id: lesson.id },
+              })
+            }
+            style={({ pressed }) => [
+              {
+                flexDirection: "row",
+                gap: 16,
+                alignItems: "center",
+                paddingVertical: 12,
+                opacity: pressed ? 0.6 : 1,
+              },
+            ]}
+          >
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 20,
+                backgroundColor: completed ? colors.green : colors.pale,
+                justifyContent: "center",
+                alignItems: "center",
+                borderBottomWidth: 4,
+                borderBottomColor: "#C0D5C7",
+              }}
+            >
+              {completed ? (
+                <Ionicons name="checkmark" color="white" size={28} />
+              ) : (
+                <Text
+                  style={{
+                    fontSize: 22,
+                    fontWeight: "800",
+                    color: colors.green,
+                  }}
+                >
+                  {i + 1}
+                </Text>
+              )}
+            </View>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text
+                style={{ fontSize: 18, fontWeight: "700", color: colors.ink }}
+              >
+                {lesson.title}
+              </Text>
+              <Text style={ui.small}>
+                {lesson.reference} · {completed ? "Revisar" : "30 XP"}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.muted} />
+          </Pressable>
+        );
+      })}
+      <Button
+        secondary
+        title="Continuar meu plano de leitura"
+        onPress={() => router.push("/plans")}
+      />
+    </Page>
+  );
 }
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F8FAFC' }, content: { padding: 24, gap: 20, paddingBottom: 40 },
-  eyebrow: { color: '#64748B', fontSize: 12, letterSpacing: 1 }, title: { fontSize: 32, fontWeight: '700', color: '#1E3A5F' },
-  muted: { color: '#475569', fontSize: 15, lineHeight: 23 }, stats: { gap: 8 }, stat: { color: '#1E3A5F', fontWeight: '600', fontSize: 17 },
-  card: { backgroundColor: 'white', borderRadius: 16, padding: 20, gap: 12, borderWidth: 1, borderColor: '#E2E8F0' },
-  heading: { fontSize: 21, fontWeight: '600', color: '#0F172A' }, chapter: { fontSize: 18, color: '#1E3A5F' },
-  button: { backgroundColor: '#1E3A5F', padding: 16, borderRadius: 12, alignItems: 'center' }, buttonText: { color: 'white', fontWeight: '600', fontSize: 16 },
-  link: { paddingVertical: 12 }, linkText: { color: '#1E3A5F', fontWeight: '600' }, notice: { color: '#64748B', lineHeight: 22 },
-});

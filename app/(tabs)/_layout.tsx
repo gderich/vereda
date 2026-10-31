@@ -1,50 +1,56 @@
-import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-
+import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "@/components/ui";
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#1E3A5F',
-        tabBarInactiveTintColor: '#94A3B8',
-        tabBarStyle: styles.tabBar,
-        tabBarLabelStyle: styles.tabLabel,
         headerShown: false,
+        tabBarActiveTintColor: colors.green,
+        tabBarInactiveTintColor: colors.muted,
+        tabBarStyle: {
+          backgroundColor: colors.paper,
+          borderTopColor: colors.line,
+        },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Hoje',
+          title: "Jornada",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="trail-sign-outline" color={color} size={size} />
           ),
         }}
       />
       <Tabs.Screen
         name="plans"
         options={{
-          title: 'Planos',
+          title: "Planos",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book" size={size} color={color} />
+            <Ionicons name="calendar-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="library"
+        options={{
+          title: "Escrituras",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="book-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: "Progresso",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="leaf-outline" color={color} size={size} />
           ),
         }}
       />
     </Tabs>
   );
 }
-
-const styles = {
-  tabBar: {
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
-    paddingBottom: 8,
-    height: 60,
-  },
-  tabLabel: {
-    fontSize: 11,
-    fontWeight: '600' as const,
-    marginTop: 2,
-  },
-};

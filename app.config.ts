@@ -33,7 +33,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/images/adaptive-icon.png',
-      backgroundColor: '#1E3A5F',
+      backgroundColor: '#216653',
     },
     package: 'com.vereda.app',
     versionCode: 1,
@@ -56,7 +56,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-notifications',
       {
         icon: './assets/images/notification-icon.png',
-        color: '#1E3A5F',
+        color: '#216653',
         defaultChannel: 'daily-reminder',
       },
     ],

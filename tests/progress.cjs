@@ -61,3 +61,48 @@ test('streak advances once per local day and resets after a gap', async () => {
   useUserStore.getState().addXP(650);
   assert.equal(useUserStore.getState().level, 4);
 });
+const { LESSONS } = require('../src/data/lessons.ts');
+test('lesson completion requires correct answers and grants XP only once', async () => {
+  await useUserStore.persist.rehydrate();
+  useUserStore.setState({ xp: 0, level: 1, lessonCompletions: {}, studyDays: {}, reflections: {} });
+  const lesson = LESSONS[0];
+  assert.equal(useUserStore.getState().finishLesson('missing', []).completed, false);
+  assert.equal(useUserStore.getState().finishLesson(lesson.id, []).completed, false);
+  assert.equal(useUserStore.getState().finishLesson(lesson.id, [0,0]).completed, false);
+  const answers = lesson.questions.map(q=>q.answer);
+  assert.deepEqual(useUserStore.getState().finishLesson(lesson.id, answers), { completed: true, xp: 30 });
+  assert.deepEqual(useUserStore.getState().finishLesson(lesson.id, answers), { completed: true, xp: 0 });
+  assert.equal(useUserStore.getState().studyDays[localDateKey(new Date())].length, 1);
+  await useUserStore.persist.rehydrate();
+  assert.equal(useUserStore.getState().xp, 30);
+  assert.ok(useUserStore.getState().lessonCompletions[lesson.id]);
+});
+test('review counts on a new day without farming XP; goals and notes persist', async () => {
+  const lesson = LESSONS[0]; const today = localDateKey(new Date());
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  useUserStore.setState({ xp: 30, studyDays: {}, lessonCompletions: { [lesson.id]: localDateKey(yesterday) }, lastReadDate:localDateKey(yesterday), streakDays:1 });
+  useUserStore.getState().finishLesson(lesson.id, lesson.questions.map(q=>q.answer));
+  assert.equal(useUserStore.getState().xp,30);
+  assert.equal(useUserStore.getState().streakDays,2);
+  assert.deepEqual(useUserStore.getState().studyDays[today],[lesson.id]);
+  useUserStore.getState().setDailyGoal(3);
+  useUserStore.getState().setDailyGoal(-1);
+  useUserStore.getState().saveReflection(lesson.id,'Minha reflexão');
+  await useUserStore.persist.rehydrate();
+  assert.equal(useUserStore.getState().dailyGoal,3);
+  assert.equal(useUserStore.getState().reflections[lesson.id],'Minha reflexão');
+});
+test('existing saved profiles receive the new study defaults without losing XP', async()=>{
+ useUserStore.setState({lessonCompletions:{},studyDays:{},reflections:{},dailyGoal:1});
+ memory.set('vereda-user-storage',JSON.stringify({state:{xp:150,level:1,name:'Gabriel'},version:0}));
+ await useUserStore.persist.rehydrate();
+ assert.equal(useUserStore.getState().xp,150);
+ assert.equal(useUserStore.getState().name,'Gabriel');
+ assert.deepEqual(useUserStore.getState().lessonCompletions,{});
+});
+test('all lesson questions have a valid answer and a unique id',()=>{
+ assert.equal(new Set(LESSONS.map(l=>l.id)).size,LESSONS.length);
+ for(const lesson of LESSONS) for(const q of lesson.questions) {
+  assert.ok(q.options[q.answer]); assert.equal(new Set(q.options).size,q.options.length); assert.ok(q.explanation);
+ }
+});

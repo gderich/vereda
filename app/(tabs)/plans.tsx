@@ -1,15 +1,21 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { READING_PLANS, getPlansByCategory, getPlanStats } from '@/data/plans';
-import { usePlanStore } from '@/store/planStore';
-import { useRouter } from 'expo-router';
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { READING_PLANS, getPlansByCategory, getPlanStats } from "@/data/plans";
+import { usePlanStore } from "@/store/planStore";
+import { useRouter } from "expo-router";
 
 const CATEGORIES = [
-  { id: 'destaque', name: '⭐ Destaque', icon: '⭐' },
-  { id: 'anual', name: '📅 Anuais', icon: '📅' },
-  { id: 'cronologico', name: '📜 Cronológicos', icon: '📜' },
-  { id: 'tematico', name: '🙏 Temáticos', icon: '🙏' },
-  { id: 'livro', name: '📖 Por Livro', icon: '📖' },
+  { id: "destaque", name: "⭐ Destaque", icon: "⭐" },
+  { id: "anual", name: "📅 Anuais", icon: "📅" },
+  { id: "cronologico", name: "📜 Cronológicos", icon: "📜" },
+  { id: "tematico", name: "🙏 Temáticos", icon: "🙏" },
+  { id: "livro", name: "📖 Por Livro", icon: "📖" },
 ];
 
 export default function PlansScreen() {
@@ -19,10 +25,15 @@ export default function PlansScreen() {
   return (
     <ScrollView style={styles.container}>
       {/* Categorias */}
-      {CATEGORIES.map(category => {
+      {CATEGORIES.map((category) => {
         let plans = getPlansByCategory(category.id as any);
-        if (category.id === 'destaque') {
-          plans = READING_PLANS.filter(p => p.id === 'brasil-365' || p.id === 'bom-completo' || p.id === 'novo-testamento');
+        if (category.id === "destaque") {
+          plans = READING_PLANS.filter(
+            (p) =>
+              p.id === "brasil-365" ||
+              p.id === "bom-completo" ||
+              p.id === "novo-testamento",
+          );
         }
 
         if (plans.length === 0) {
@@ -31,14 +42,22 @@ export default function PlansScreen() {
 
         return (
           <View key={category.id} style={styles.categorySection}>
-            <Text style={styles.categoryTitle}>{category.icon} {category.name}</Text>
+            <Text style={styles.categoryTitle}>
+              {category.icon} {category.name}
+            </Text>
 
-            {plans.map(plan => (
+            {plans.map((plan) => (
               <PlanCard
                 key={plan.id}
                 plan={plan}
                 isActive={activePlanId === plan.id}
-                onPress={() => { setActivePlan(plan.id); router.push({ pathname: "/reading/[planId]", params: { planId: plan.id } }); }}
+                onPress={() => {
+                  setActivePlan(plan.id);
+                  router.push({
+                    pathname: "/reading/[planId]",
+                    params: { planId: plan.id },
+                  });
+                }}
               />
             ))}
           </View>
@@ -51,7 +70,7 @@ export default function PlansScreen() {
 }
 
 interface PlanCardProps {
-  plan: typeof READING_PLANS[0];
+  plan: (typeof READING_PLANS)[0];
   isActive: boolean;
   onPress: () => void;
 }
@@ -62,10 +81,7 @@ function PlanCard({ plan, isActive, onPress }: PlanCardProps) {
   return (
     <TouchableOpacity
       accessibilityRole="button"
-      style={[
-        styles.planCard,
-        isActive && styles.planCardActive,
-      ]}
+      style={[styles.planCard, isActive && styles.planCardActive]}
       activeOpacity={0.8}
       onPress={onPress}
     >
@@ -89,9 +105,9 @@ function PlanCard({ plan, isActive, onPress }: PlanCardProps) {
               ⚡ {totalXP.toLocaleString()} XP total
             </Text>
             <Text style={styles.planMetaItem}>
-              {plan.difficulty === 'iniciante' && '🟢 Iniciante'}
-              {plan.difficulty === 'intermediario' && '🟡 Intermediário'}
-              {plan.difficulty === 'avancado' && '🔴 Avançado'}
+              {plan.difficulty === "iniciante" && "🟢 Iniciante"}
+              {plan.difficulty === "intermediario" && "🟡 Intermediário"}
+              {plan.difficulty === "avancado" && "🔴 Avançado"}
             </Text>
           </View>
         </View>
@@ -103,7 +119,7 @@ function PlanCard({ plan, isActive, onPress }: PlanCardProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: "#F7F5EF",
     padding: 16,
   },
   categorySection: {
@@ -111,50 +127,50 @@ const styles = StyleSheet.create({
   },
   categoryTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontWeight: "bold",
+    color: "#203D46",
     marginBottom: 12,
   },
   planCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: "#DCDDD4",
   },
   planCardActive: {
-    borderColor: '#1E3A5F',
+    borderColor: "#216653",
     borderWidth: 2,
   },
   planCardLocked: {
     opacity: 0.7,
   },
   activeIndicator: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     height: 4,
-    backgroundColor: '#1E3A5F',
+    backgroundColor: "#216653",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
   planCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
   planIcon: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#F1F5F9",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   planEmoji: {
@@ -165,48 +181,48 @@ const styles = StyleSheet.create({
   },
   planName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontWeight: "bold",
+    color: "#203D46",
     marginBottom: 8,
   },
   planNameActive: {
-    color: '#1E3A5F',
+    color: "#216653",
   },
   planMeta: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   planMetaItem: {
     fontSize: 12,
-    color: '#64748B',
+    color: "#57676B",
   },
   lockedSection: {
     marginTop: 8,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: "#DCDDD4",
   },
   lockedTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#F59E0B',
+    fontWeight: "600",
+    color: "#F59E0B",
     marginBottom: 12,
   },
   lockOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: "rgba(255,255,255,0.8)",
     borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   lockText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#F59E0B',
+    fontWeight: "600",
+    color: "#F59E0B",
   },
 });
