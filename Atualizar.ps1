@@ -8,6 +8,11 @@ git pull --ff-only
 if ($LASTEXITCODE -ne 0) { throw 'A atualizacao pelo Git falhou.' }
 npm ci
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao instalar dependencias.' }
+# As rotas geradas pertencem ao checkout anterior. O Expo as recria ao iniciar.
+$routerTypes = Join-Path $PSScriptRoot '.expo\types\router.d.ts'
+if (Test-Path -LiteralPath $routerTypes) {
+    Remove-Item -LiteralPath $routerTypes -Force
+}
 npm run typecheck
 if ($LASTEXITCODE -ne 0) { throw 'A verificacao encontrou erros.' }
 node .\node_modules\expo\bin\cli start --dev-client --tunnel --clear
