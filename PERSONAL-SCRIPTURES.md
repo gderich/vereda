@@ -1,10 +1,14 @@
-# Livro de Mórmon offline — Vereda 1.3
+# Exemplares do Livro de Mórmon — Vereda 1.4
+
+O Livro de Mórmon já está integrado e disponível offline. Não é necessário importar nenhum arquivo.
+
+A importação descrita abaixo é opcional e serve para usar um exemplar alternativo compatível. Ela fica em **Biblioteca → Livro de Mórmon → Gerenciar exemplar alternativo**. Ao remover um exemplar importado, o app volta ao texto integrado e preserva histórico, XP e marcações. Marcações cujo trecho não coincide com a edição atual continuam salvas, mas não são aplicadas a palavras diferentes.
 
 ## No celular
 
 1. Instale o APK 1.3 (ou posterior). A importação usa `expo-document-picker`, que exige um novo build nativo; reiniciar o Metro não adiciona esse módulo ao APK antigo.
 2. Baixe **Livro-de-Mormon.vereda.json** para o celular. Esse é o pacote pessoal convertido; não selecione o PDF original.
-3. Abra **Biblioteca → Mórmon → Importar Livro de Mórmon** e selecione o arquivo.
+3. Abra **Biblioteca → Livro de Mórmon → Gerenciar exemplar alternativo → Importar Livro de Mórmon** e selecione o arquivo.
 4. Aguarde a confirmação de 15 livros, 239 capítulos e 6.604 versículos. Abra um capítulo; depois de importado, ele funciona em modo avião.
 
 O leitor usa as mesmas preferências de fonte/tema, marcações, registro de leitura e XP da Bíblia. Nos planos, concluir o capítulo também atualiza o plano. Reler não duplica o XP de capítulo.
@@ -17,7 +21,7 @@ Não existe login nem sincronização com a Conta da Igreja. As marcações da B
 
 O pacote pessoal foi convertido do PDF em português de 2015 fornecido pelo usuário. Ele contém os versículos, sem introduções, resumos de capítulos ou notas de rodapé. As palavras e a edição do PDF são preservadas; diferenças de redação com o site atual não são corrigidas silenciosamente.
 
-O PDF e o texto convertido não são publicados neste repositório. O GitHub contém o código do importador e os números de versículos por capítulo. O arquivo `.vereda.json` é disponibilizado separadamente ao dono do exemplar e pode ser importado localmente.
+O PDF original permanece fora deste repositório. A partir da versão 1.4, o texto convertido fornecido pelo proprietário do projeto está integrado em um módulo comprimido. Pacotes alternativos `.vereda.json` continuam locais; não são enviados para nenhum servidor.
 
 Para reproduzir a conversão desse PDF específico em um computador com Python:
 

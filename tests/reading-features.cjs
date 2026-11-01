@@ -1,0 +1,27 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),ts=require('typescript'),Module=require('node:module');
+const storage=new Map(),original=Module._load;
+Module._load=function(id,...args){if(id==='@react-native-async-storage/async-storage')return {getItem:async k=>storage.get(k)||null,setItem:async(k,v)=>storage.set(k,v),removeItem:async k=>storage.delete(k)};return original.call(this,id,...args);};
+require.extensions['.ts']=(m,f)=>m._compile(ts.transpileModule(fs.readFileSync(f,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,esModuleInterop:true}}).outputText,f);
+const {getBookOfMormon}=require('../src/data/bookOfMormon');
+const {annotationSegments,wordsWithOffsets}=require('../src/data/annotations');
+const {useAnnotationStore:marks}=require('../src/store/annotationStore');
+const {nextReading,recentReadingDays}=require('../src/data/readingHabit');
+const {useReadingHabitStore:habit}=require('../src/store/readingHabitStore');
+test('bundled Book of Mormon validates 15 books, 239 chapters, 6604 verses without import or network',()=>{const p=getBookOfMormon();assert.equal(Object.keys(p.books).length,15);assert.equal(Object.values(p.books).reduce((n,c)=>n+Object.keys(c).length,0),239);assert.equal(Object.values(p.books).flatMap(c=>Object.values(c)).reduce((n,v)=>n+v.length,0),6604);assert.match(p.books['1ne']['1'][0],/Néfi/);assert.match(p.books.moro['10'][33],/Amém/);assert.equal(getBookOfMormon(),p);});
+test('range markings preserve text, support overlapping styles, update and remove independently',async()=>{
+ await marks.persist.rehydrate();marks.setState({marks:[]});const text='Fé e esperança, todos os dias.';
+ assert.equal(marks.getState().save('alma:32:1',text,5,14,'blue','underline','Minha nota'),true);
+ const a=marks.getState().marks[0];assert.equal(a.quote,'esperança');
+ assert.equal(marks.getState().save('alma:32:1',text,5,14,'gold','highlight','Outra nota'),true);assert.equal(marks.getState().marks.length,1);assert.equal(marks.getState().marks[0].id,a.id);
+ marks.getState().save('alma:32:1',text,0,8,'pink','bold','');const seg=annotationSegments(text,marks.getState().marks);
+ assert.equal(seg.map(s=>s.text).join(''),text);assert.equal(seg[0].mark.style,'bold');assert.equal(seg.find(s=>s.text==='erança').mark.style,'highlight');
+ assert.equal(annotationSegments('Texto alterado',marks.getState().marks).filter(s=>s.mark).length,0);
+ marks.getState().remove(a.id);assert.equal(marks.getState().marks.length,1);
+ await new Promise(r=>setImmediate(r));await marks.persist.rehydrate();assert.equal(marks.getState().marks.length,1);
+ assert.equal(marks.getState().save('alma:99:1',text,0,2,'blue','bold',''),false);assert.equal(marks.getState().save('alma:1:1',text,-1,2,'blue','bold',''),false);assert.equal(marks.getState().save('alma:1:1',text,0,2,'__proto__','bold',''),false);
+});
+test('word selection handles accents and punctuation with exact offsets',()=>{const t='Fé, esperança e ação.';const w=wordsWithOffsets(t);assert.deepEqual(w.map(x=>t.slice(x.start,x.end)),['Fé,','esperança','e','ação.']);});
+test('weekly reading counts days, excludes old/future records and preserves history',()=>{const now=new Date(2026,10,1,12);const days={'2026-10-25':['a'],'2026-10-26':['a','b'],'2026-10-31':['c'],'2026-11-01':['d'],'2026-11-02':['e']};assert.equal(recentReadingDays(days,now).filter(d=>d.read).length,3);assert.equal(Object.keys(days).length,5);});
+test('reading continuation crosses book boundaries and never confuses scripture collections',()=>{assert.deepEqual(nextReading(null,{}),{bookId:'1ne',chapter:1});assert.deepEqual(nextReading({bookId:'1ne',chapter:1},{}),{bookId:'1ne',chapter:1});assert.deepEqual(nextReading({bookId:'1ne',chapter:22},{'1ne:22':'date'}),{bookId:'2ne',chapter:1});assert.deepEqual(nextReading({bookId:'moro',chapter:10},{'moro:10':'date'}),{bookId:'1ne',chapter:1});});
+test('routine preferences persist with bounded choices and do not activate notifications',async()=>{await habit.persist.rehydrate();habit.getState().setCue('Antes de dormir');habit.getState().setWeeklyGoal(5);await habit.persist.rehydrate();assert.equal(habit.getState().cue,'Antes de dormir');assert.equal(habit.getState().weeklyGoal,5);habit.getState().setWeeklyGoal(99);assert.equal(habit.getState().weeklyGoal,5);});
+test('original sounds have faded boundaries, no clipping and short duration',()=>{for(const name of ['correct','retry','complete']){const b=fs.readFileSync(`assets/sounds/${name}.wav`);assert.equal(b.toString('ascii',0,4),'RIFF');assert.equal(b.readUInt16LE(22),1);const rate=b.readUInt32LE(24);let peak=0;for(let i=44;i<b.length;i+=2)peak=Math.max(peak,Math.abs(b.readInt16LE(i)));assert.ok(peak<17000&&peak>10000);assert.equal(b.readInt16LE(44),0);assert.equal(b.readInt16LE(b.length-2),0);assert.ok((b.length-44)/2/rate<1.3);}});

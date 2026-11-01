@@ -8,6 +8,7 @@ import { localDateKey } from "@/utils/date";
 import { Page, Button, Progress, ui, colors } from "@/components/ui";
 import PathArt from "@/components/PathArt";
 import BrandMark from "@/components/BrandMark";
+import ReadingHabitCard from "@/components/ReadingHabitCard";
 import DailyMissions from "@/components/DailyMissions";
 import { testSound } from "@/services/sounds";
 export default function HomeScreen() {
@@ -46,6 +47,7 @@ export default function HomeScreen() {
           seu dia.
         </Text>
       </View>
+      <ReadingHabitCard />
       <View style={ui.card}>
         <View style={[ui.row, { justifyContent: "space-between" }]}>
           <Text style={ui.heading}>

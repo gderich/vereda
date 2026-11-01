@@ -124,7 +124,7 @@ export const READING_PLANS: ReadingPlan[] = [
   {
     id: 'brasil-365',
     name: 'Brasil 365',
-    description: 'Leia AT, NT e Livro de Mórmon em sequência, com meta de cerca de 4 capítulos por dia.',
+    description: 'Leia o Antigo Testamento, o Novo Testamento e o Livro de Mórmon em sequência, com meta de cerca de 4 capítulos por dia.',
     testament: 'all',
     books: [
       // Janeiro - Gênesis a Êxodo

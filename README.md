@@ -2,9 +2,16 @@
 
 Aplicativo pessoal de acompanhamento de leitura das escrituras em português. Expo SDK 51, React Native 0.74.5, React 18.2, TypeScript e Expo Router. Sem login, backend, assinatura ou limite de leituras.
 
-## Versão 1.3 — Livro de Mórmon offline
+## Versão 1.4 — leitura pronta e marcações pessoais
 
-Importe seu exemplar pessoal em **Biblioteca → Mórmon**. Veja [como importar](PERSONAL-SCRIPTURES.md). A importação exige um novo APK. O texto pessoal não acompanha este repositório.
+- Livro de Mórmon integrado: abre offline sem baixar ou importar JSON. A Bíblia continua integrada.
+- Categorias com nomes completos: Livro de Mórmon, Antigo Testamento e Novo Testamento.
+- Toque em um versículo para escolher a primeira e a última palavra de um trecho. Use quatro cores e realce, sublinhado ou negrito; acrescente uma nota de até 500 caracteres.
+- As marcações podem ser editadas, excluídas e revisitadas em Biblioteca → Marcações. Favoritos antigos são preservados.
+- Início com leitura em um toque, momento de rotina escolhido pelo usuário e meta de 3, 5 ou 7 dias nos últimos sete dias. Sem perda de XP por dias sem leitura.
+- Novos sons originais, curtos e suaves, com entrada/saída gradual e volume ajustável.
+
+Veja [a origem do texto incorporado](BOOK-OF-MORMON-SOURCE.md), [as opções de exemplar](PERSONAL-SCRIPTURES.md) e [a pesquisa e as próximas melhorias](READING-EXPERIENCE.md).
 
 ## Leitura e prática diária
 
@@ -17,7 +24,7 @@ Importe seu exemplar pessoal em **Biblioteca → Mórmon**. Veja [como importar]
 - Seis lições guiadas, reflexões, conquistas, lembrete local e calendário de estudos.
 - Sons normalizados, volume 40/80/100%, botão de teste na tela inicial e diagnóstico de módulo ausente, opção desligada ou falha de reprodução.
 - Marcações e progresso são locais. A Conta da Igreja ainda **não** está conectada; não foi encontrada uma API pública documentada para sincronizar anotações de terceiros. O acesso oficial continua externo.
-- Livro de Mórmon offline por importação pessoal: 15 livros, 239 capítulos e 6.604 versículos. O leitor também atende planos e lições.
+- Livro de Mórmon integrado offline: 15 livros, 239 capítulos e 6.604 versículos. O leitor também atende planos e lições.
 
 Os efeitos dependem do módulo nativo `expo-av` incluído a partir do APK 1.1. Atualizar somente o JavaScript de um build anterior não acrescenta áudio. Use o botão **Testar áudio** para identificar a situação no aparelho. O código não pede acesso ao microfone.
 

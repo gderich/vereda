@@ -5,6 +5,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useUserStore } from '@/store/userStore';
 import { usePlanStore } from '@/store/planStore';
+import { useAnnotationStore } from '@/store/annotationStore';
+import { useReadingHabitStore } from '@/store/readingHabitStore';
+import { loadPersonalScriptures, useScriptureStore } from '@/store/scriptureStore';
 
 import { StatusBar } from 'expo-status-bar';
 import { stopSounds } from '@/services/sounds';
@@ -20,17 +23,18 @@ export default function RootLayout() {
     SplashScreen.hideAsync().catch(console.warn);
     let mounted = true;
     let timer: ReturnType<typeof setTimeout>;
+    const stores = [useUserStore,usePlanStore,useAnnotationStore,useReadingHabitStore];
     const check = () => {
-      if (mounted && useUserStore.persist.hasHydrated() && usePlanStore.persist.hasHydrated()) {
+      if (mounted && stores.every(store=>store.persist.hasHydrated()) && useScriptureStore.getState().ready) {
         useUserStore.getState().migrateReadings(Object.values(usePlanStore.getState().userPlans).flatMap(plan => plan.completedChapters));
         clearTimeout(timer); setReady(true);
       }
     };
-    const offUser = useUserStore.persist.onFinishHydration(check);
-    const offPlan = usePlanStore.persist.onFinishHydration(check);
+    const off = stores.map(store=>store.persist.onFinishHydration(check));
+    void loadPersonalScriptures().then(check);
     timer = setTimeout(() => { if (mounted) setFailed(true); }, 10000);
     check();
-    return () => { mounted = false; clearTimeout(timer); offUser(); offPlan(); };
+    return () => { mounted = false; clearTimeout(timer); off.forEach(unsubscribe=>unsubscribe()); };
   }, []);
   return <SafeAreaProvider>
     <StatusBar style="light" />

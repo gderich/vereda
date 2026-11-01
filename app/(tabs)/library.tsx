@@ -5,21 +5,25 @@ import { ALL_BOOKS, getBook } from "@/data/books";
 import { chapterUrl } from "@/data/scriptureLinks";
 import ScriptureReader from "@/components/ScriptureReader";
 import { useUserStore } from "@/store/userStore";
+import { useAnnotationStore } from "@/store/annotationStore";
+import { MARK_COLORS } from "@/data/annotations";
 import ScriptureImport from "@/components/ScriptureImport";
 import { useScriptureStore, loadPersonalScriptures } from "@/store/scriptureStore";
 export default function LibraryScreen() {
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<"new" | "old" | "bom" | "saved">("new");
   const [selected, setSelected] = useState<string | null>(null);
-  const [reading, setReading] = useState<{ url: string; title: string } | null>(
+  const [reading, setReading] = useState<{ url: string; title: string; targetVerse?: number } | null>(
     null,
   );
   const user = useUserStore();
+  const marks = useAnnotationStore(s=>s.marks);
+  const [manage, setManage] = useState(false);
   const pack = useScriptureStore(s => s.pack);
   useEffect(() => { void loadPersonalScriptures(); }, []);
-  function open(id: string, ch: number) {
+  function open(id: string, ch: number, targetVerse?: number) {
     const url = chapterUrl(id, ch);
-    if (url) setReading({ url, title: `${getBook(id)?.name} ${ch}` });
+    if (url) setReading({ url, title: `${getBook(id)?.name} ${ch}`, targetVerse });
   }
   const normalize = (s: string) =>
     s
@@ -39,7 +43,7 @@ export default function LibraryScreen() {
         Leia. Marque. Volte.
       </Text>
       <Text style={ui.body}>
-        Bíblia completa offline · Almeida Recebida. +15 XP por capítulo novo;
+        Bíblia e Livro de Mórmon completos offline. +15 XP por capítulo novo;
         releituras mantêm sua sequência.
       </Text>
       {user.lastChapter && (
@@ -53,10 +57,10 @@ export default function LibraryScreen() {
       <View style={ui.row}>
         {(
           [
-            ["new", "Novo"],
-            ["old", "Velho"],
-            ["bom", "Mórmon"],
-            ["saved", "Marcados"],
+            ["new", "Novo Testamento"],
+            ["old", "Antigo Testamento"],
+            ["bom", "Livro de Mórmon"],
+            ["saved", "Marcações"],
           ] as const
         ).map(([key, label]) => (
           <Pressable
@@ -86,9 +90,10 @@ export default function LibraryScreen() {
       </View>
       {tab === "saved" ? (
         <>
-          {user.bookmarks.length === 0 ? (
+          {marks.map(m=>{const [id,ch,v]=m.reference.split(":");return <View key={m.id} style={ui.card}><Text style={ui.heading}>{getBook(id)?.name} {ch}:{v}</Text><Text style={[ui.body,{color:MARK_COLORS[m.color].night}]}>{m.quote}</Text>{m.note?<Text style={ui.body}>{m.note}</Text>:null}<Button secondary title="Abrir trecho marcado" onPress={()=>open(id,Number(ch),Number(v))}/></View>;})}
+          {user.bookmarks.length === 0 && marks.length === 0 ? (
             <Text style={ui.body}>
-              Toque nos versículos durante a leitura para guardá-los aqui.
+              Toque em um versículo para marcar um trecho, escrever uma nota ou guardá-lo nos favoritos.
             </Text>
           ) : (
             user.bookmarks.map((key) => {
@@ -101,7 +106,7 @@ export default function LibraryScreen() {
                   <Button
                     secondary
                     title="Abrir capítulo marcado"
-                    onPress={() => open(id, Number(ch))}
+                    onPress={() => open(id, Number(ch), Number(verse))}
                   />
                 </View>
               );
@@ -119,7 +124,7 @@ export default function LibraryScreen() {
             style={[ui.input, { minHeight: 52 }]}
           />
           {tab === "bom" && (
-            <ScriptureImport />
+            <View style={ui.card}><Text style={ui.body}>Livro de Mórmon completo: 15 livros e 239 capítulos, prontos para ler sem internet.</Text><Button secondary title={manage?"Fechar opções do exemplar":"Gerenciar exemplar alternativo"} onPress={()=>setManage(!manage)}/>{manage&&<ScriptureImport />}</View>
           )}
           {books.length === 0 && (
             <Text style={ui.body}>Nenhum livro encontrado.</Text>
@@ -139,9 +144,7 @@ export default function LibraryScreen() {
                 </Text>
                 <Text style={ui.small}>
                   {book.chapters} capítulos ·{" "}
-                  {book.testament === "bom" && !pack
-                    ? "Importe seu exemplar"
-                    : "Disponível offline"}
+                  {"Disponível offline"}
                 </Text>
               </Pressable>
               {selected === book.id && (

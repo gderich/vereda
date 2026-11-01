@@ -163,17 +163,17 @@ test('native offline reader displays real verses, bookmarks and one-time reading
  let tree;act(()=>{tree=Renderer.create(React.createElement(Screen,{url:'https://www.churchofjesuschrist.org/study/scriptures/nt/matt/5?lang=por',title:'Mateus 5',onClose:()=>{}}));});
  assert.equal(tree.root.findAllByType('WebView').length,0);
  const verse=tree.root.findAllByType('Pressable').find(n=>n.props.accessibilityLabel?.startsWith('Versículo 1.'));
- assert.ok(verse);act(()=>verse.props.onPress());assert.ok(useUserStore.getState().bookmarks.includes('mat:5:1'));
+ assert.ok(verse);act(()=>verse.props.onPress());act(()=>button(tree,'Guardar versículo nos favoritos').props.onPress());act(()=>button(tree,'Voltar à leitura').props.onPress());assert.ok(useUserStore.getState().bookmarks.includes('mat:5:1'));
  act(()=>button(tree,'Concluir leitura · +15 XP na primeira vez').props.onPress());
  assert.equal(useUserStore.getState().xp,15);
  act(()=>button(tree,'Leitura registrada · +15 XP').props.onPress());assert.equal(useUserStore.getState().xp,15);
  act(()=>tree.unmount());
 });
-test('Mormon reading identifies absent corpus instead of showing web content',()=>{
+test('Book of Mormon opens offline without personal import',()=>{
  const Screen=require('../src/components/ScriptureReader.tsx').default;
  let tree;act(()=>{tree=Renderer.create(React.createElement(Screen,{url:'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/32?lang=por',title:'Alma 32',onClose:()=>{}}));});
  assert.equal(tree.root.findAllByType('WebView').length,0);
- assert.ok(button(tree,'Li no meu exemplar · Registrar'));
+ assert.ok(button(tree,'Concluir leitura · +15 XP na primeira vez'));assert.equal(tree.root.findAllByType('Pressable').filter(n=>n.props.accessibilityLabel?.startsWith('Versículo ')).length,43);
  act(()=>tree.unmount());
 });
 test('imported Mormon text supports native reading, bookmarks, font, theme and plan completion',()=>{
@@ -188,7 +188,7 @@ test('imported Mormon text supports native reading, bookmarks, font, theme and p
  assert.equal(tree.root.findAllByType('WebView').length,0);
  assert.ok(tree.root.findAllByType('Text').some(n=>n.children.includes('Texto fictício do primeiro versículo.')));
  const verse=tree.root.findAllByType('Pressable').find(n=>n.props.accessibilityLabel?.startsWith('Versículo 1.'));
- act(()=>verse.props.onPress());assert.ok(useUserStore.getState().bookmarks.includes('1ne:1:1'));
+ act(()=>verse.props.onPress());act(()=>button(tree,'Guardar versículo nos favoritos').props.onPress());act(()=>button(tree,'Voltar à leitura').props.onPress());assert.ok(useUserStore.getState().bookmarks.includes('1ne:1:1'));
  act(()=>tree.root.findAllByType('Pressable').find(n=>n.props.accessibilityLabel==='Aumentar fonte').props.onPress());assert.equal(useUserStore.getState().readerFont,24);
  act(()=>button(tree,'☀ Papel sépia').props.onPress());assert.equal(useUserStore.getState().readerTheme,'sepia');
  act(()=>button(tree,'Concluir leitura · +15 XP na primeira vez').props.onPress());
@@ -196,4 +196,17 @@ test('imported Mormon text supports native reading, bookmarks, font, theme and p
  assert.deepEqual(usePlanStore.getState().userPlans['bom-completo'].completedChapters,['1ne:1']);
  assert.equal(tree.root.findAllByType('Modal').length,0);
  act(()=>tree.unmount());useScriptureStore.setState({pack:null});
+});
+test('reader selects a partial verse, changes color and style, saves a note and renders it',()=>{
+ const {useAnnotationStore}=require('../src/store/annotationStore');useAnnotationStore.setState({marks:[]});
+ const Screen=require('../src/components/ScriptureReader.tsx').default;let tree;
+ act(()=>{tree=Renderer.create(React.createElement(Screen,{url:'https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/1?lang=por',title:'1 Néfi 1',onClose(){}}));});
+ act(()=>tree.root.findAllByType('Pressable').find(n=>n.props.accessibilityLabel?.startsWith('Versículo 1.')).props.onPress());
+ function word(n){return tree.root.findAllByType('Text').find(t=>t.props.accessibilityLabel?.startsWith(`Selecionar palavra ${n}:`));}
+ act(()=>word(2).props.onPress());act(()=>word(5).props.onPress());
+ act(()=>tree.root.findAllByType('Pressable').find(t=>t.props.accessibilityLabel==='Cor Azul').props.onPress());act(()=>button(tree,'Sublinhado').props.onPress());
+ act(()=>tree.root.findByType('TextInput').props.onChangeText('Minha reflexão pessoal.'));
+ act(()=>button(tree,'Salvar marcação').props.onPress());
+ const mark=useAnnotationStore.getState().marks[0];assert.equal(mark.style,'underline');assert.equal(mark.color,'blue');assert.equal(mark.note,'Minha reflexão pessoal.');assert.ok(mark.start>0);assert.ok(tree.root.findAllByType('Text').some(t=>t.props.style?.textDecorationLine==='underline'));
+ act(()=>tree.unmount());
 });

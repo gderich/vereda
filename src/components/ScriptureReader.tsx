@@ -18,27 +18,37 @@ import { useUserStore } from "../store/userStore";
 import { playSound } from "../services/sounds";
 import { useScriptureStore, loadPersonalScriptures } from "../store/scriptureStore";
 import ScriptureImport from "./ScriptureImport";
+import { getBookOfMormon } from "../data/bookOfMormon";
+import AnnotationEditor from "./AnnotationEditor";
+import { annotationSegments, MARK_COLORS } from "../data/annotations";
+import { useAnnotationStore } from "../store/annotationStore";
 export default function ScriptureReader({
   url,
   title,
   onClose,
   onRead,
+  targetVerse,
 }: {
   url: string;
   title: string;
   onClose: () => void;
+  targetVerse?: number;
   onRead?: (book: string, chapter: number) => void;
 }) {
   const initial = referenceFromUrl(url);
   const [chapter, setChapter] = useState(initial?.chapter || 1);
   const [result, setResult] = useState<string | null>(null);
   const ref = useRef<ScrollView>(null);
+  const jumped = useRef(false);
+  const [editing, setEditing] = useState<number|null>(null);
+  const marks = useAnnotationStore(s => s.marks);
   const user = useUserStore();
   const { pack, ready } = useScriptureStore();
   useEffect(() => { void loadPersonalScriptures(); }, []);
   const book = initial ? getBook(initial.bookId) : undefined;
+  const bookOfMormon = book?.testament === "bom" ? pack || getBookOfMormon() : null;
   const verses =
-    book ? (book.testament === "bom" ? pack?.books[book.id]?.[String(chapter)] || [] : getVerses(book.id, chapter)) : [];
+    book ? (book.testament === "bom" ? bookOfMormon?.books[book.id]?.[String(chapter)] || [] : getVerses(book.id, chapter)) : [];
   const sepia = user.readerTheme === "sepia";
   const paper = sepia ? "#F0E3C8" : "#102632",
     ink = sepia ? "#342A20" : "#E7E3D9",
@@ -58,12 +68,14 @@ export default function ScriptureReader({
   function turn(delta: number) {
     setChapter((c) => c + delta);
     setResult(null);
+    setEditing(null);
     ref.current?.scrollTo({ y: 0, animated: false });
   }
   return (
     <Modal visible animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={{ flex: 1, backgroundColor: paper }}>
         <StatusBar style={sepia ? "dark" : "light"} />
+        {editing !== null && book ? <AnnotationEditor key={`${book.id}:${chapter}:${editing}`} reference={`${book.id}:${chapter}:${editing+1}`} title={`${book.name} ${chapter}:${editing+1}`} text={verses[editing]} onClose={()=>setEditing(null)} /> : <>
         <View
           style={{
             padding: 16,
@@ -134,7 +146,7 @@ export default function ScriptureReader({
           {verses.length ? (
             <>
               <Text style={{ color: muted, fontSize: 12 }}>
-                {book?.testament === "bom" ? pack?.edition : BIBLE_EDITION}. Toque em um versículo para marcar ou desmarcar.
+                {book?.testament === "bom" ? bookOfMormon?.edition : BIBLE_EDITION}. Toque em um versículo para selecionar um trecho, usar cores ou guardar nos favoritos.
               </Text>
               {verses.map((verse, i) => {
                 const key = `${book!.id}:${chapter}:${i + 1}`,
@@ -145,7 +157,8 @@ export default function ScriptureReader({
                     accessibilityLabel={`Versículo ${i + 1}. ${saved ? "Marcado. " : ""}${verse}`}
                     accessibilityState={{ selected: saved }}
                     key={i}
-                    onPress={() => user.toggleBookmark(key)}
+                    onLayout={e=>{if(!jumped.current && targetVerse===i+1){jumped.current=true;ref.current?.scrollTo({y:Math.max(0,e.nativeEvent.layout.y-16),animated:false});}}}
+                    onPress={() => setEditing(i)}
                     style={{
                       padding: 8,
                       borderRadius: 8,
@@ -170,7 +183,10 @@ export default function ScriptureReader({
                       >
                         {i + 1}{" "}
                       </Text>
-                      {verse}
+                      {annotationSegments(verse, marks.filter(m=>m.reference===key)).map((part,j)=> {
+                        const m=part.mark,c=m?MARK_COLORS[m.color]:null;
+                        return <Text key={j} style={m&&c?{backgroundColor:m.style==='highlight'?c.fill:'transparent',color:m.style==='highlight'?'#172B35':sepia?c.day:c.night,textDecorationLine:m.style==='underline'?'underline':'none',fontWeight:m.style==='bold'?'700':'400'}:undefined}>{part.text}</Text>;
+                      })}
                       {saved ? "  ◆" : ""}
                     </Text>
                   </Pressable>
@@ -213,7 +229,7 @@ export default function ScriptureReader({
                 </View>
               )}
               <Text style={{ color: muted, fontSize: 12 }}>
-                {book?.testament === "bom" ? "Texto do seu exemplar importado. Notas de rodapé e resumos não fazem parte desta leitura." : "Texto: almeidarecebida.org · Almeida Recebida, domínio público segundo o editor. Esta edição difere da edição da Igreja."}
+                {book?.testament === "bom" ? "Livro de Mórmon · texto em português da edição de 2015, disponível neste aparelho. Notas de rodapé e resumos não fazem parte desta leitura." : "Texto: almeidarecebida.org · Almeida Recebida, domínio público segundo o editor. Esta edição difere da edição da Igreja."}
               </Text>
           <Button secondary title="Abrir na Biblioteca do Evangelho ↗" onPress={()=>{const official=book?chapterUrl(book.id,chapter):null;if(official)Linking.openURL(official).catch(()=>Alert.alert('Não foi possível abrir','Verifique sua conexão.'));}}/>
           <Text style={{color:muted,fontSize:12}}>Suas marcações da Conta da Igreja ficam no serviço oficial. As marcações feitas aqui são locais e não são sincronizadas com ele.</Text>
@@ -254,6 +270,7 @@ export default function ScriptureReader({
             </>
           )}
         </ScrollView>
+        </>}
       </SafeAreaView>
     </Modal>
   );
