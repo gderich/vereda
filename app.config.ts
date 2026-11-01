@@ -1,5 +1,7 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
+const projectId = 'b246984d-e059-4380-a167-6b139435adb2';
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Vereda',
@@ -15,6 +17,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     backgroundColor: '#102D39',
   },
   updates: {
+    enabled: true,
+    url: `https://u.expo.dev/${projectId}`,
+    checkAutomatically: 'ON_LOAD',
     fallbackToCacheTimeout: 0,
   },
   runtimeVersion: {
@@ -104,7 +109,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     router: {},
     eas: {
-      projectId: 'b246984d-e059-4380-a167-6b139435adb2',
+      projectId,
     },
   },
 });

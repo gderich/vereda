@@ -7,6 +7,11 @@ import {
   enableDailyReminder,
   disableDailyReminder,
 } from "@/services/notifications";
+import {
+  applyDownloadedUpdate,
+  checkForAppUpdate,
+  getUpdateInfo,
+} from "@/services/updates";
 import { Page, Button, Progress, ui, colors } from "@/components/ui";
 import {
   testSound,
@@ -14,9 +19,14 @@ import {
   playSound,
   stopSounds,
 } from "@/services/sounds";
+
 export default function ProgressScreen() {
   const user = useUserStore();
   const [busy, setBusy] = useState(false);
+  const [updateBusy, setUpdateBusy] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState("");
+  const [updateDownloaded, setUpdateDownloaded] = useState(false);
+  const updateInfo = getUpdateInfo();
   const count = Object.keys(user.lessonCompletions).length;
   const week = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
@@ -55,6 +65,7 @@ export default function ProgressScreen() {
       earned: user.chaptersReadCount >= 10,
     },
   ];
+
   async function reminder() {
     setBusy(true);
     try {
@@ -79,6 +90,19 @@ export default function ProgressScreen() {
       setBusy(false);
     }
   }
+
+  async function checkUpdate() {
+    setUpdateBusy(true);
+    setUpdateMessage("Verificando…");
+    try {
+      const result = await checkForAppUpdate();
+      setUpdateMessage(result.message);
+      setUpdateDownloaded(result.status === "downloaded");
+    } finally {
+      setUpdateBusy(false);
+    }
+  }
+
   return (
     <Page>
       <Text style={ui.eyebrow}>SEU CRESCIMENTO</Text>
@@ -232,6 +256,32 @@ export default function ProgressScreen() {
           }
           onPress={reminder}
         />
+      </View>
+      <View style={ui.card}>
+        <Text style={ui.heading}>Atualizações do Vereda</Text>
+        <Text style={ui.body}>
+          O app pode receber correções, novas telas, textos e conteúdos sem você
+          precisar instalar outro APK.
+        </Text>
+        <Text style={ui.small}>
+          {updateInfo.enabled
+            ? `Canal: ${updateInfo.channel || "não identificado"} · Runtime: ${updateInfo.runtimeVersion || "—"}`
+            : "Atualizações OTA ficam disponíveis no APK de distribuição."}
+        </Text>
+        {!!updateMessage && <Text style={ui.small}>{updateMessage}</Text>}
+        {updateDownloaded ? (
+          <Button
+            title="Reiniciar e aplicar atualização"
+            onPress={() => void applyDownloadedUpdate()}
+          />
+        ) : (
+          <Button
+            secondary
+            disabled={updateBusy}
+            title={updateBusy ? "Verificando…" : "Verificar atualização"}
+            onPress={() => void checkUpdate()}
+          />
+        )}
       </View>
       <View style={ui.card}>
         <Text style={ui.heading}>Seu diário de reflexões</Text>

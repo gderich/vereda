@@ -58,6 +58,18 @@ Module._load = function (id, ...args) {
       useLocalSearchParams: () => ({ id: routeId, planId: "bom-completo" }),
     };
   if (id === "expo-notifications") return { setNotificationHandler: () => {} };
+  if (id === "expo-updates")
+    return {
+      isEnabled: false,
+      channel: null,
+      runtimeVersion: null,
+      updateId: null,
+      createdAt: null,
+      isEmbeddedLaunch: true,
+      checkForUpdateAsync: async () => ({ isAvailable: false }),
+      fetchUpdateAsync: async () => ({ isNew: false }),
+      reloadAsync: async () => {},
+    };
   if (id === "@react-native-async-storage/async-storage")
     return {
       getItem: async (k) => storage.get(k) || null,
