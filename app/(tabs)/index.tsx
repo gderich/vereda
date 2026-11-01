@@ -11,6 +11,7 @@ import BrandMark from "@/components/BrandMark";
 import ReadingHabitCard from "@/components/ReadingHabitCard";
 import DailyMissions from "@/components/DailyMissions";
 import { testSound } from "@/services/sounds";
+
 export default function HomeScreen() {
   const router = useRouter();
   const user = useUserStore();
@@ -24,6 +25,11 @@ export default function HomeScreen() {
   )
     ? user.streakDays
     : 0;
+
+  function openLesson(id: string) {
+    router.push(`/lesson/${id}` as any);
+  }
+
   return (
     <Page>
       <View style={[ui.row, { justifyContent: "space-between" }]}>
@@ -65,12 +71,7 @@ export default function HomeScreen() {
         </Text>
         <Button
           title={next ? `Começar · ${next.title}` : "Revisar a jornada"}
-          onPress={() =>
-            router.push({
-              pathname: "/lesson/[id]",
-              params: { id: next?.id || LESSONS[0].id },
-            })
-          }
+          onPress={() => openLesson(next?.id || LESSONS[0].id)}
         />
       </View>
       <Button
@@ -108,12 +109,7 @@ export default function HomeScreen() {
             accessibilityRole="button"
             accessibilityLabel={`${lesson.title}. ${completed ? "Concluída. Revisar" : "Começar lição"}`}
             key={lesson.id}
-            onPress={() =>
-              router.push({
-                pathname: "/lesson/[id]",
-                params: { id: lesson.id },
-              })
-            }
+            onPress={() => openLesson(lesson.id)}
             style={({ pressed }) => [
               {
                 flexDirection: "row",
