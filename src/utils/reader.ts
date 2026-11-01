@@ -1,15 +1,6 @@
-// Only official scripture pages can be loaded in the integrated reader.
+// Works with the partial URL implementation in React Native 0.74.
 export function isScriptureUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return (
-      url.protocol === "https:" &&
-      url.hostname === "www.churchofjesuschrist.org" &&
-      url.pathname.startsWith("/study/scriptures/") &&
-      !url.username &&
-      !url.password
-    );
-  } catch {
-    return false;
-  }
+  return /^https:\/\/www\.churchofjesuschrist\.org\/study\/scriptures\/[a-z0-9/-]+(?:[?#][^\s]*)?$/.test(
+    value,
+  );
 }

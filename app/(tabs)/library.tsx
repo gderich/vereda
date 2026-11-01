@@ -1,76 +1,179 @@
 import React, { useState } from "react";
-import { Text, View, Linking, Alert } from "react-native";
-import { Page, Button, ui } from "@/components/ui";
-const collections = [
-  {
-    title: "Livro de Mórmon",
-    description: "Outro Testamento de Jesus Cristo",
-    path: "bofm",
-  },
-  {
-    title: "Velho Testamento",
-    description: "Da criação aos profetas",
-    path: "ot",
-  },
-  {
-    title: "Novo Testamento",
-    description: "A vida de Cristo e o testemunho dos apóstolos",
-    path: "nt",
-  },
-  {
-    title: "Doutrina e Convênios",
-    description: "Revelações e ensinamentos",
-    path: "dc-testament",
-  },
-  {
-    title: "Pérola de Grande Valor",
-    description: "Escrituras e declarações de fé",
-    path: "pgp",
-  },
-];
+import { Text, View, TextInput, Pressable } from "react-native";
+import { Page, Button, ui, colors } from "@/components/ui";
+import { ALL_BOOKS, getBook } from "@/data/books";
+import { chapterUrl } from "@/data/scriptureLinks";
 import ScriptureReader from "@/components/ScriptureReader";
+import { useUserStore } from "@/store/userStore";
 export default function LibraryScreen() {
-  const [reading, setReading] = useState<{ title: string; url: string } | null>(
+  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<"new" | "old" | "bom" | "saved">("new");
+  const [selected, setSelected] = useState<string | null>(null);
+  const [reading, setReading] = useState<{ url: string; title: string } | null>(
     null,
+  );
+  const user = useUserStore();
+  function open(id: string, ch: number) {
+    const url = chapterUrl(id, ch);
+    if (url) setReading({ url, title: `${getBook(id)?.name} ${ch}` });
+  }
+  const normalize = (s: string) =>
+    s
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  const books = ALL_BOOKS.filter(
+    (b) => b.testament === tab && normalize(b.name).includes(normalize(query)),
   );
   return (
     <Page>
       {reading && (
-        <ScriptureReader
-          title={reading.title}
-          url={reading.url}
-          onClose={() => setReading(null)}
-        />
+        <ScriptureReader {...reading} onClose={() => setReading(null)} />
       )}
-      <Text style={ui.eyebrow}>FONTES PARA SUA JORNADA</Text>
+      <Text style={ui.eyebrow}>SUA BIBLIOTECA</Text>
       <Text accessibilityRole="header" style={ui.title}>
-        Abra as escrituras.
+        Leia. Marque. Volte.
       </Text>
       <Text style={ui.body}>
-        As escrituras em português, com a fonte oficial sempre à vista.
+        Bíblia completa offline · Almeida Recebida. +15 XP por capítulo novo;
+        releituras mantêm sua sequência.
       </Text>
-      {collections.map((c) => (
-        <View key={c.path} style={ui.card}>
-          <Text style={ui.heading}>{c.title}</Text>
-          <Text style={ui.body}>{c.description}</Text>
-          <Button
-            secondary
-            title="Ler no Vereda"
-            onPress={() =>
-              setReading({
-                title: c.title,
-                url: `https://www.churchofjesuschrist.org/study/scriptures/${c.path}?lang=por`,
-              })
-            }
+      {user.lastChapter && (
+        <Button
+          title={`Continuar · ${getBook(user.lastChapter.bookId)?.name} ${user.lastChapter.chapter}`}
+          onPress={() =>
+            open(user.lastChapter!.bookId, user.lastChapter!.chapter)
+          }
+        />
+      )}
+      <View style={ui.row}>
+        {(
+          [
+            ["new", "Novo"],
+            ["old", "Velho"],
+            ["bom", "Mórmon"],
+            ["saved", "Marcados"],
+          ] as const
+        ).map(([key, label]) => (
+          <Pressable
+            key={key}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: tab === key }}
+            onPress={() => {
+              setTab(key);
+              setSelected(null);
+            }}
+            style={{
+              padding: 12,
+              borderRadius: 12,
+              backgroundColor: tab === key ? colors.green : colors.surface,
+            }}
+          >
+            <Text
+              style={{
+                color: tab === key ? colors.night : colors.ink,
+                fontWeight: "700",
+              }}
+            >
+              {label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      {tab === "saved" ? (
+        <>
+          {user.bookmarks.length === 0 ? (
+            <Text style={ui.body}>
+              Toque nos versículos durante a leitura para guardá-los aqui.
+            </Text>
+          ) : (
+            user.bookmarks.map((key) => {
+              const [id, ch, verse] = key.split(":");
+              return (
+                <View key={key} style={ui.card}>
+                  <Text style={ui.heading}>
+                    {getBook(id)?.name} {ch}:{verse}
+                  </Text>
+                  <Button
+                    secondary
+                    title="Abrir capítulo marcado"
+                    onPress={() => open(id, Number(ch))}
+                  />
+                </View>
+              );
+            })
+          )}
+        </>
+      ) : (
+        <>
+          <TextInput
+            accessibilityLabel="Buscar livro"
+            placeholder="Buscar livro…"
+            placeholderTextColor={colors.muted}
+            value={query}
+            onChangeText={setQuery}
+            style={[ui.input, { minHeight: 52 }]}
           />
-        </View>
-      ))}
-      <Text style={ui.small}>
-        A leitura integrada exibe o site oficial e precisa de internet. As
-        lições, perguntas e reflexões salvas no Vereda funcionam offline. Entrar
-        na conta da Igreja no serviço oficial não sincroniza o progresso deste
-        app.
-      </Text>
+          {tab === "bom" && (
+            <Text style={ui.small}>
+              Os planos e estudos estão disponíveis. O texto integral do Livro
+              de Mórmon ainda requer seu exemplar ou a fonte oficial externa.
+            </Text>
+          )}
+          {books.length === 0 && (
+            <Text style={ui.body}>Nenhum livro encontrado.</Text>
+          )}
+          {books.map((book) => (
+            <View style={ui.card} key={book.id}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ expanded: selected === book.id }}
+                onPress={() =>
+                  setSelected(selected === book.id ? null : book.id)
+                }
+                style={{ paddingVertical: 8 }}
+              >
+                <Text style={ui.heading}>
+                  {book.name} {selected === book.id ? "−" : "+"}
+                </Text>
+                <Text style={ui.small}>
+                  {book.chapters} capítulos ·{" "}
+                  {book.testament === "bom"
+                    ? "Registro de leitura"
+                    : "Disponível offline"}
+                </Text>
+              </Pressable>
+              {selected === book.id && (
+                <View style={ui.row}>
+                  {Array.from({ length: book.chapters }, (_, i) => (
+                    <Pressable
+                      key={i}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${book.name} ${i + 1}`}
+                      onPress={() => open(book.id, i + 1)}
+                      style={{
+                        minWidth: 48,
+                        minHeight: 48,
+                        borderRadius: 12,
+                        backgroundColor: user.readingLog[`${book.id}:${i + 1}`]
+                          ? colors.pale
+                          : colors.paper,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text style={{ color: colors.ink }}>
+                        {i + 1}
+                        {user.readingLog[`${book.id}:${i + 1}`] ? " ✓" : ""}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+            </View>
+          ))}
+        </>
+      )}
     </Page>
   );
 }

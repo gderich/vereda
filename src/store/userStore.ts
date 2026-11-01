@@ -1,3 +1,5 @@
+import { getBook } from "../data/books";
+import { dailyQuestions } from "../data/challenge";
 import { getLesson } from "../data/lessons";
 import { localDateKey } from "../utils/date";
 import { create } from "zustand";
@@ -18,6 +20,25 @@ export interface UserState {
   gems: number;
   chaptersReadCount: number;
 
+  readingLedgerMigrated: boolean;
+  migrateReadings: (chapters:string[]) => void;
+  readingLog: Record<string, string>;
+  readingDays: Record<string, string[]>;
+  reflectionDays: Record<string, boolean>;
+  challengeDays: Record<string, number>;
+  claimedMissions: string[];
+  bookmarks: string[];
+  lastChapter: { bookId: string; chapter: number } | null;
+  readerFont: number;
+  readerTheme: "night" | "sepia";
+  soundVolume: number;
+  recordReading: (bookId: string, chapter: number) => number;
+  finishChallenge: (
+    date: string,
+    answers: number[],
+  ) => { xp: number; score: number };
+  claimMissions: () => number;
+  toggleBookmark: (key: string) => void;
   soundsEnabled: boolean;
   dailyGoal: number;
   lessonCompletions: Record<string, string>;
@@ -51,6 +72,17 @@ const INITIAL_STATE = {
   gems: 0,
   chaptersReadCount: 0,
   notificationsEnabled: false,
+  readingLedgerMigrated: false,
+  readingLog: {} as Record<string, string>,
+  readingDays: {} as Record<string, string[]>,
+  reflectionDays: {} as Record<string, boolean>,
+  challengeDays: {} as Record<string, number>,
+  claimedMissions: [] as string[],
+  bookmarks: [] as string[],
+  lastChapter: null as { bookId: string; chapter: number } | null,
+  readerFont: 22,
+  readerTheme: "night" as "night" | "sepia",
+  soundVolume: 0.8,
   soundsEnabled: true,
   dailyGoal: 1,
   lessonCompletions: {} as Record<string, string>,
@@ -63,6 +95,115 @@ export const useUserStore = create<UserState>()(
     (set, get) => ({
       ...INITIAL_STATE,
 
+      migrateReadings: (chapters) => {
+        if(get().readingLedgerMigrated)return;
+        const previous:Record<string,string>={};
+        for(const key of chapters){const [id,c]=key.split(':');const book=getBook(id),chapter=Number(c);if(book&&Number.isInteger(chapter)&&chapter>=1&&chapter<=book.chapters)previous[key]=get().lastReadDate||localDateKey(new Date());}
+        set({readingLog:{...previous,...get().readingLog},readingLedgerMigrated:true});
+      },
+      toggleBookmark: (key) =>
+        set({
+          bookmarks: get().bookmarks.includes(key)
+            ? get().bookmarks.filter((k) => k !== key)
+            : [...get().bookmarks, key],
+        }),
+      recordReading: (bookId, chapter) => {
+        const book = getBook(bookId);
+        if (
+          !book ||
+          !Number.isInteger(chapter) ||
+          chapter < 1 ||
+          chapter > book.chapters
+        )
+          return 0;
+        const state = get(),
+          key = `${bookId}:${chapter}`,
+          today = localDateKey(new Date());
+        const earned = state.readingLog[key] ? 0 : 15;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const streak =
+          state.lastReadDate === today
+            ? state.streakDays
+            : state.lastReadDate === localDateKey(yesterday)
+              ? state.streakDays + 1
+              : 1;
+        set({
+          readingLog: {
+            ...state.readingLog,
+            [key]: state.readingLog[key] || today,
+          },
+          readingDays: {
+            ...state.readingDays,
+            [today]: [...new Set([...(state.readingDays[today] || []), key])],
+          },
+          lastChapter: { bookId, chapter },
+          xp: state.xp + earned,
+          level: Math.floor((state.xp + earned) / 200) + 1,
+          chaptersReadCount: state.chaptersReadCount + (earned ? 1 : 0),
+          streakDays: streak,
+          maxStreak: Math.max(streak, state.maxStreak),
+          lastReadDate: today,
+        });
+        return earned;
+      },
+      finishChallenge: (date, answers) => {
+        const questions = dailyQuestions(date);
+        if (
+          date !== localDateKey(new Date()) ||
+          answers.length !== questions.length ||
+          answers.some(
+            (a, i) =>
+              !Number.isInteger(a) || a < 0 || a >= questions[i].options.length,
+          )
+        )
+          return { xp: 0, score: 0 };
+        const score = questions.filter(
+            (q, i) => q.answer === answers[i],
+          ).length,
+          state = get();
+        const xp = state.challengeDays[date] !== undefined ? 0 : 10 + score * 4;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const streak =
+          state.lastReadDate === date
+            ? state.streakDays
+            : state.lastReadDate === localDateKey(yesterday)
+              ? state.streakDays + 1
+              : 1;
+        set({
+          xp: state.xp + xp,
+          level: Math.floor((state.xp + xp) / 200) + 1,
+          challengeDays: {
+            ...state.challengeDays,
+            [date]: Math.max(score, state.challengeDays[date] || 0),
+          },
+          streakDays: streak,
+          maxStreak: Math.max(streak, state.maxStreak),
+          lastReadDate: date,
+        });
+        return { xp, score };
+      },
+      claimMissions: () => {
+        const state = get(),
+          today = localDateKey(new Date());
+        if (
+          state.claimedMissions.includes(today) ||
+          !state.readingDays[today]?.length ||
+          !(
+            state.studyDays[today]?.length ||
+            state.challengeDays[today] !== undefined
+          ) ||
+          !state.reflectionDays[today]
+        )
+          return 0;
+        set({
+          xp: state.xp + 25,
+          level: Math.floor((state.xp + 25) / 200) + 1,
+          claimedMissions: [...state.claimedMissions, today],
+        });
+        return 25;
+      },
       setDailyGoal: (goal) => {
         if ([1, 2, 3].includes(goal)) set({ dailyGoal: goal });
       },
@@ -70,6 +211,10 @@ export const useUserStore = create<UserState>()(
         if (getLesson(id))
           set({
             reflections: { ...get().reflections, [id]: text.slice(0, 2000) },
+            reflectionDays:
+              text.trim().length >= 15
+                ? { ...get().reflectionDays, [localDateKey(new Date())]: true }
+                : get().reflectionDays,
           });
       },
       finishLesson: (id, answers) => {

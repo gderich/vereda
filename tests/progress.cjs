@@ -106,3 +106,47 @@ test('all lesson questions have a valid answer and a unique id',()=>{
   assert.ok(q.options[q.answer]); assert.equal(new Set(q.options).size,q.options.length); assert.ok(q.explanation);
  }
 });
+const {getVerses}=require('../src/data/bible');
+const {ALL_BOOKS}=require('../src/data/books');
+const {dailyQuestions}=require('../src/data/challenge');
+test('offline Bible includes 66 complete books, 1189 chapters and 31102 verses',()=>{
+ let chapters=0,verses=0;const bible=ALL_BOOKS.filter(b=>b.testament!=='bom');assert.equal(bible.length,66);
+ for(const b of bible)for(let c=1;c<=b.chapters;c++){const v=getVerses(b.id,c);assert.ok(v.length,`${b.id}:${c}`);chapters++;verses+=v.length;}
+ assert.equal(chapters,1189);assert.equal(verses,31102);
+ assert.ok(getVerses('gen',1)[0].startsWith('No princípio Deus'));
+ assert.deepEqual(getVerses('alma',32),[]);
+});
+test('reading rewards are global per chapter and rereading still counts today',()=>{
+ useUserStore.setState({readingLog:{},readingDays:{},xp:0,chaptersReadCount:0});
+ assert.equal(useUserStore.getState().recordReading('mat',5),15);
+ assert.equal(useUserStore.getState().recordReading('mat',5),0);
+ assert.equal(useUserStore.getState().recordReading('mat',500),0);
+ assert.equal(useUserStore.getState().chaptersReadCount,1);
+ assert.equal(useUserStore.getState().readingDays[localDateKey(new Date())].length,1);
+});
+test('daily challenge scores validated answers and awards only first attempt',()=>{
+ const today=localDateKey(new Date()),q=dailyQuestions(today);
+ assert.equal(new Set(q.map(x=>x.id)).size,5);assert.deepEqual(q,dailyQuestions(today));
+ useUserStore.setState({challengeDays:{},xp:0});
+ assert.deepEqual(useUserStore.getState().finishChallenge(today,[]),{xp:0,score:0});
+ assert.deepEqual(useUserStore.getState().finishChallenge(today,q.map(x=>x.answer)),{xp:30,score:5});
+ assert.equal(useUserStore.getState().finishChallenge(today,q.map(x=>x.answer)).xp,0);
+});
+test('mission bonus requires reading, practice and reflection and can only be claimed once',()=>{
+ const today=localDateKey(new Date());
+ useUserStore.setState({readingDays:{},studyDays:{},challengeDays:{},reflectionDays:{},claimedMissions:[],xp:0});
+ assert.equal(useUserStore.getState().claimMissions(),0);
+ useUserStore.setState({readingDays:{[today]:['mat:5']},challengeDays:{[today]:3}});
+ assert.equal(useUserStore.getState().claimMissions(),0);
+ useUserStore.getState().saveReflection('luz','Quero ajudar alguém hoje.');
+ assert.equal(useUserStore.getState().claimMissions(),25);
+ assert.equal(useUserStore.getState().claimMissions(),0);
+});
+test('legacy plan readings migrate without awarding XP or duplicating chapter counts',()=>{
+ useUserStore.setState({readingLedgerMigrated:false,readingLog:{},xp:120,chaptersReadCount:2});
+ useUserStore.getState().migrateReadings(['mat:5','mat:5','bad:10','gen:1000']);
+ assert.deepEqual(Object.keys(useUserStore.getState().readingLog),['mat:5']);
+ assert.equal(useUserStore.getState().recordReading('mat',5),0);
+ assert.equal(useUserStore.getState().xp,120);
+ assert.equal(useUserStore.getState().chaptersReadCount,2);
+});

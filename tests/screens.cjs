@@ -31,6 +31,7 @@ Module._load = function (id, ...args) {
       Platform: { OS: "android" },
     };
   if (id === "expo-modules-core") return { NativeModulesProxy: {} };
+  if (id === "expo-status-bar") return {StatusBar:"StatusBar"};
   if (id === "expo-web-browser")
     return { openBrowserAsync: async () => ({ type: "dismiss" }) };
   if (id === "react-native-webview") return { WebView: "WebView" };
@@ -155,50 +156,22 @@ test("lesson retries wrong answers, saves reflection and completes exactly once"
   );
   act(() => tree.unmount());
 });
-test("integrated reader falls back without native module and returns to the lesson", () => {
-  const Screen = require("../app/lesson/[id].tsx").default;
-  let tree;
-  act(() => {
-    tree = Renderer.create(React.createElement(Screen));
-  });
-  act(() => button(tree, `Ler ${LESSONS[0].reference}`).props.onPress());
-  assert.ok(button(tree, "Abrir leitura"));
-  act(() => button(tree, "Voltar ao estudo").props.onPress());
-  assert.equal(tree.root.findAllByType("Modal").length, 0);
-  assert.ok(button(tree, "Já li · Vamos praticar"));
-  act(() => tree.unmount());
+test('native offline reader displays real verses, bookmarks and one-time reading XP',()=>{
+ const Screen=require('../src/components/ScriptureReader.tsx').default;
+ useUserStore.setState({xp:0,readingLog:{},readingDays:{},bookmarks:[],chaptersReadCount:0});
+ let tree;act(()=>{tree=Renderer.create(React.createElement(Screen,{url:'https://www.churchofjesuschrist.org/study/scriptures/nt/matt/5?lang=por',title:'Mateus 5',onClose:()=>{}}));});
+ assert.equal(tree.root.findAllByType('WebView').length,0);
+ const verse=tree.root.findAllByType('Pressable').find(n=>n.props.accessibilityLabel?.startsWith('Versículo 1.'));
+ assert.ok(verse);act(()=>verse.props.onPress());assert.ok(useUserStore.getState().bookmarks.includes('mat:5:1'));
+ act(()=>button(tree,'Concluir leitura · +15 XP na primeira vez').props.onPress());
+ assert.equal(useUserStore.getState().xp,15);
+ act(()=>button(tree,'Leitura registrada · +15 XP').props.onPress());assert.equal(useUserStore.getState().xp,15);
+ act(()=>tree.unmount());
 });
-test("native reader handles failed loading, retry and limits embedded navigation", () => {
-  hasNativeReader = true;
-  delete require.cache[
-    require.resolve("../src/components/ScriptureReader.tsx")
-  ];
-  const Screen = require("../src/components/ScriptureReader.tsx").default;
-  let tree;
-  act(() => {
-    tree = Renderer.create(
-      React.createElement(Screen, {
-        url: "https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/32?lang=por",
-        title: "Alma 32",
-        onClose: () => {},
-      }),
-    );
-  });
-  const view = tree.root.findByType("WebView");
-  assert.equal(
-    view.props.onShouldStartLoadWithRequest({ url: "https://example.com" }),
-    false,
-  );
-  assert.equal(
-    view.props.onShouldStartLoadWithRequest({
-      url: "https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/33?lang=por",
-    }),
-    true,
-  );
-  act(() => view.props.onError());
-  assert.ok(button(tree, "Tentar novamente"));
-  act(() => button(tree, "Tentar novamente").props.onPress());
-  assert.ok(tree.root.findByType("WebView"));
-  act(() => tree.unmount());
-  hasNativeReader = false;
+test('Mormon reading identifies absent corpus instead of showing web content',()=>{
+ const Screen=require('../src/components/ScriptureReader.tsx').default;
+ let tree;act(()=>{tree=Renderer.create(React.createElement(Screen,{url:'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/32?lang=por',title:'Alma 32',onClose:()=>{}}));});
+ assert.equal(tree.root.findAllByType('WebView').length,0);
+ assert.ok(button(tree,'Li no meu exemplar · Registrar'));
+ act(()=>tree.unmount());
 });

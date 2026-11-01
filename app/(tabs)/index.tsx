@@ -8,6 +8,8 @@ import { localDateKey } from "@/utils/date";
 import { Page, Button, Progress, ui, colors } from "@/components/ui";
 import PathArt from "@/components/PathArt";
 import BrandMark from "@/components/BrandMark";
+import DailyMissions from "@/components/DailyMissions";
+import { testSound } from "@/services/sounds";
 export default function HomeScreen() {
   const router = useRouter();
   const user = useUserStore();
@@ -25,13 +27,13 @@ export default function HomeScreen() {
     <Page>
       <View style={[ui.row, { justifyContent: "space-between" }]}>
         <View style={[ui.row, { gap: 8 }]}>
-          <View style={{ backgroundColor: colors.ink, borderRadius: 12 }}>
+          <View style={{ backgroundColor: colors.night, borderRadius: 12 }}>
             <BrandMark size={40} />
           </View>
           <Text style={ui.eyebrow}>VEREDA</Text>
         </View>
         <Text style={{ color: colors.green, fontWeight: "700" }}>
-          ☀ {streak} dias · {user.xp} XP
+          🔥 {streak} dias · {user.xp} XP
         </Text>
       </View>
       <View>
@@ -69,6 +71,24 @@ export default function HomeScreen() {
           }
         />
       </View>
+      <Button
+        secondary
+        title="♫ Testar áudio do app"
+        onPress={() => void testSound()}
+      />
+      <DailyMissions />
+      <View style={ui.card}>
+        <Text style={ui.eyebrow}>PRÁTICA RÁPIDA</Text>
+        <Text style={ui.heading}>Desafio do dia</Text>
+        <Text style={ui.body}>
+          Cinco perguntas para recordar o que importa. Até 30 XP na primeira
+          rodada do dia.
+        </Text>
+        <Button
+          title="Começar desafio"
+          onPress={() => router.push("/challenge")}
+        />
+      </View>
       <View>
         <Text style={ui.eyebrow}>JORNADA 01 · FUNDAMENTOS</Text>
         <Text accessibilityRole="header" style={[ui.heading, { marginTop: 8 }]}>
@@ -98,7 +118,7 @@ export default function HomeScreen() {
                 gap: 16,
                 alignItems: "center",
                 padding: 16,
-                backgroundColor: colors.white,
+                backgroundColor: colors.surface,
                 borderRadius: 20,
                 borderWidth: 1,
                 borderColor:
@@ -120,7 +140,7 @@ export default function HomeScreen() {
               }}
             >
               {completed ? (
-                <Ionicons name="checkmark" color="white" size={28} />
+                <Ionicons name="checkmark" color={colors.night} size={28} />
               ) : (
                 <Text
                   style={{

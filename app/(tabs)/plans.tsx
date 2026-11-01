@@ -119,7 +119,7 @@ function PlanCard({ plan, isActive, onPress }: PlanCardProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7F5EF",
+    backgroundColor: "#0B1D29",
     padding: 16,
   },
   categorySection: {
@@ -128,11 +128,11 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#203D46",
+    color: "#F5E8C8",
     marginBottom: 12,
   },
   planCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#142F3E",
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -141,10 +141,10 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#DCDDD4",
+    borderColor: "#35505D",
   },
   planCardActive: {
-    borderColor: "#216653",
+    borderColor: "#F2C66D",
     borderWidth: 2,
   },
   planCardLocked: {
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 4,
-    backgroundColor: "#216653",
+    backgroundColor: "#F2C66D",
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
@@ -182,11 +182,11 @@ const styles = StyleSheet.create({
   planName: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#203D46",
+    color: "#F5E8C8",
     marginBottom: 8,
   },
   planNameActive: {
-    color: "#216653",
+    color: "#F2C66D",
   },
   planMeta: {
     flexDirection: "row",
@@ -195,13 +195,13 @@ const styles = StyleSheet.create({
   },
   planMetaItem: {
     fontSize: 12,
-    color: "#57676B",
+    color: "#AEC0C9",
   },
   lockedSection: {
     marginTop: 8,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "#DCDDD4",
+    borderTopColor: "#35505D",
   },
   lockedTitle: {
     fontSize: 14,

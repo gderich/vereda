@@ -36,7 +36,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '📖',
     color: '#1E3A5F',
     dailyChapters: 1,
-    xpPerChapter: 10,
+    xpPerChapter: 15,
     bonusXpOnComplete: 500,
   },
   {
@@ -56,7 +56,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '✝️',
     color: '#C49A2C',
     dailyChapters: 1,
-    xpPerChapter: 10,
+    xpPerChapter: 15,
     bonusXpOnComplete: 500,
   },
   {
@@ -71,7 +71,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '📜',
     color: '#1E3A5F',
     dailyChapters: 1,
-    xpPerChapter: 10,
+    xpPerChapter: 15,
     bonusXpOnComplete: 200,
   },
   {
@@ -86,7 +86,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '📨',
     color: '#0F172A',
     dailyChapters: 1,
-    xpPerChapter: 12,
+    xpPerChapter: 15,
     bonusXpOnComplete: 300,
   },
   {
@@ -101,7 +101,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '🙏',
     color: '#8B7355',
     dailyChapters: 1,
-    xpPerChapter: 8,
+    xpPerChapter: 15,
     bonusXpOnComplete: 250,
   },
   {
@@ -116,7 +116,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '🌍',
     color: '#1E3A5F',
     dailyChapters: 1,
-    xpPerChapter: 10,
+    xpPerChapter: 15,
     bonusXpOnComplete: 400,
   },
 
@@ -190,7 +190,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '🌱',
     color: '#1E3A5F',
     dailyChapters: 1,
-    xpPerChapter: 20,
+    xpPerChapter: 15,
     bonusXpOnComplete: 50,
   },
   {
@@ -205,7 +205,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '❤️',
     color: '#E84A5F',
     dailyChapters: 1,
-    xpPerChapter: 20,
+    xpPerChapter: 15,
     bonusXpOnComplete: 50,
   },
   {
@@ -220,7 +220,7 @@ export const READING_PLANS: ReadingPlan[] = [
     icon: '🛡️',
     color: '#64748B',
     dailyChapters: 1,
-    xpPerChapter: 20,
+    xpPerChapter: 15,
     bonusXpOnComplete: 50,
   },
   {

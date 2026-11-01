@@ -75,8 +75,7 @@ export default function LessonScreen() {
             onPress={() => setReading(true)}
           />
           <Text style={ui.small}>
-            A leitura abre sobre a lição. Você volta ao mesmo ponto quando
-            terminar. É necessário estar online.
+            A Bíblia abre no leitor offline. Para o Livro de Mórmon, use seu exemplar e registre a leitura. Você volta à lição ao fechar.
           </Text>
           <Button title="Já li · Vamos praticar" onPress={() => setStep(0)} />
         </>
@@ -156,7 +155,7 @@ export default function LessonScreen() {
                 {
                   borderWidth: 2,
                   borderColor: selected === i ? colors.green : colors.line,
-                  backgroundColor: selected === i ? colors.pale : colors.white,
+                  backgroundColor: selected === i ? colors.pale : colors.surface,
                 },
               ]}
             >

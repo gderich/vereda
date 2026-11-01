@@ -4,7 +4,7 @@ import BrandMark from "./BrandMark";
 export default function PathArt() {
   return (
     <View style={styles.scene}>
-      <BrandMark size={200} />
+      <BrandMark size={150} />
     </View>
   );
 }

@@ -8,6 +8,7 @@ const proxy = {};
 let enabled = true;
 let sounds = [];
 Module._load = function (id, ...args) {
+  if (id === "react-native") return {Alert:{alert:()=>{}}};
   if (id === "expo-modules-core") return { NativeModulesProxy: proxy };
   if (id === "../store/userStore")
     return { useUserStore: { getState: () => ({ soundsEnabled: enabled }) } };

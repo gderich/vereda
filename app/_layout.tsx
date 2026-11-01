@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useUserStore } from '@/store/userStore';
 import { usePlanStore } from '@/store/planStore';
 
+import { StatusBar } from 'expo-status-bar';
 import { stopSounds } from '@/services/sounds';
 
 export default function RootLayout() {
@@ -21,6 +22,7 @@ export default function RootLayout() {
     let timer: ReturnType<typeof setTimeout>;
     const check = () => {
       if (mounted && useUserStore.persist.hasHydrated() && usePlanStore.persist.hasHydrated()) {
+        useUserStore.getState().migrateReadings(Object.values(usePlanStore.getState().userPlans).flatMap(plan => plan.completedChapters));
         clearTimeout(timer); setReady(true);
       }
     };
@@ -31,11 +33,13 @@ export default function RootLayout() {
     return () => { mounted = false; clearTimeout(timer); offUser(); offPlan(); };
   }, []);
   return <SafeAreaProvider>
-    {ready ? <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <StatusBar style="light" />
+    {ready ? <SafeAreaView style={{ flex: 1, backgroundColor: "#0B1D29" }} edges={['top']}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="reading/[planId]" />
         <Stack.Screen name="lesson/[id]" />
+        <Stack.Screen name="challenge" />
       </Stack>
     </SafeAreaView> : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
       {failed ? <Text>Não foi possível carregar o progresso. Feche e abra o aplicativo novamente. Seus dados não foram apagados.</Text> : <ActivityIndicator />}

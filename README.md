@@ -2,40 +2,20 @@
 
 Aplicativo pessoal de acompanhamento de leitura das escrituras em português. Expo SDK 51, React Native 0.74.5, React 18.2, TypeScript e Expo Router. Sem login, backend, assinatura ou limite de leituras.
 
-## Versão 1.1 — uma vereda iluminada
+## Versão 1.2 — leitura nativa e prática diária
 
-O símbolo agora é um caminho dourado guiado por um livro de escrituras iluminado, sobre azul profundo. SVGs editáveis e PNGs estão em `assets/images`; o mesmo desenho é usado no app, no ícone e na splash.
+- Tema escuro azul profundo com superfícies azuladas, texto creme e detalhes dourados.
+- Bíblia offline nativa: 66 livros, 1.189 capítulos e 31.102 versículos da Almeida Recebida 1.7. Fonte, declaração de domínio público e importador documentados em [BIBLE-SOURCE.md](BIBLE-SOURCE.md). Não é a edição da Igreja.
+- Leitor com fonte ajustável, modo noite/sépia, capítulos anterior/próximo, versículos marcados e retomada de leitura. Nenhuma WebView.
+- 15 XP por capítulo novo, globalmente (ler o mesmo capítulo em outro plano não repete a recompensa). Releituras mantêm a sequência. Planos mantêm seu bônus de conclusão.
+- Desafio diário com cinco perguntas em ordem determinada pelo dia. Primeira rodada: 10 XP + 4 por acerto; novas rodadas não repetem XP. Resultado explica as respostas incorretas.
+- Missões de ler, praticar e refletir (15 caracteres): bônus diário de 25 XP, resgatável uma vez.
+- Seis lições guiadas, reflexões, conquistas, lembrete local e calendário de estudos.
+- Sons normalizados, volume 40/80/100%, botão de teste na tela inicial e diagnóstico de módulo ausente, opção desligada ou falha de reprodução.
+- Marcações e progresso são locais. A Conta da Igreja ainda **não** está conectada; não foi encontrada uma API pública documentada para sincronizar anotações de terceiros. O acesso oficial continua externo.
+- O Livro de Mórmon ainda não tem texto offline incorporado. Sua leitura pode ser registrada a partir do exemplar do usuário; a interface informa a limitação e não apresenta resumos como versículos.
 
-- Leitura integrada em uma janela sobre a lição, plano ou biblioteca: exibe o site oficial, com carregamento, tentativa novamente e alternativa no navegador. Requer internet; não baixa nem redistribui o texto completo.
-- Os sons autorais de acerto, nova tentativa e conclusão estão em `assets/sounds`. Podem ser desligados na aba Progresso. São curtos, não pedem microfone e param quando o app vai para segundo plano.
-- Novos módulos nativos: `expo-av ~14.0.7` e `react-native-webview 13.8.6`, conforme a tabela de dependências do SDK 51 instalado. **Requer novo APK/development build** para habilitar sons e WebView. O build antigo usa a janela do navegador e permanece sem som.
-- Para gerar um APK completo: `git pull --ff-only`, depois `.\Atualizar.ps1 -Apk` no PowerShell. O EAS pode solicitar login; o APK sai pelo link do build, sem depender do PC para abrir.
-- A WebView mantém a fonte oficial visível e limita a navegação incorporada às páginas das escrituras. Login e outras páginas devem ser abertos no navegador; não há sincronização de contas.
-
-A leitura incorporada e o áudio foram verificados em testes com módulos nativos simulados e exportação Android. O comportamento real do site, do áudio e do build nativo ainda deve ser conferido no aparelho.
-
-## Estado atual
-
-- Jornada Fundamentos com seis lições autorais: fé, luz, amor, serviço, sabedoria e caridade.
-- Duas perguntas por lição, explicações e novas tentativas sem penalidade.
-- 30 XP na primeira conclusão; revisões mantêm a sequência e contam para a meta, sem repetir XP.
-- Metas de 1, 2 ou 3 lições distintas por dia, calendário de estudo, níveis e cinco conquistas.
-- Reflexões pessoais salvas automaticamente e reunidas no diário da aba Progresso.
-- Planos de leitura com progresso local e links para o capítulo no site oficial.
-- Aba Escrituras com acesso às cinco coleções da Biblioteca do Evangelho.
-- Lembrete local às 19h e compartilhamento de um resumo de progresso.
-- Identidade própria em verde, creme e dourado; ilustração vetorial original de um caminho que nasce de um livro.
-- **Não é um leitor offline integral.** Lições, perguntas e reflexões funcionam offline, mas o texto completo é exibido a partir do serviço oficial. A edição bíblica exibida é a da fonte externa.
-- Sem sincronização com a conta da Igreja. Não foi encontrada uma integração pública documentada para autenticação e sincronização de progresso de terceiros.
-- O ícone e a splash novos aparecem no próximo build nativo. As telas mudam ao atualizar o JavaScript.
-
-## Conteúdo e referências
-
-O Vereda é independente, inspirado em estudo diário e aprendizagem por prática. Não inclui código nem assets extraídos de Tether ou Duolingo. Resumos e perguntas são autorais; não substituem o texto das escrituras.
-
-Fontes das seis lições: Alma 32:21–43, Mateus 5:13–16, 1 Coríntios 13, Mosias 2:17–19, Tiago 1:5–6 e Morôni 7:45–48. Cada lição abre seu capítulo em português no site oficial.
-
-A ligação para a Biblioteca do Evangelho segue a [documentação oficial de links](https://www.churchofjesuschrist.org/learn/mobile-applications/deep-linking-in-gospel-library?lang=eng). O sistema do aparelho decide se abre no navegador ou no aplicativo instalado. Entrar no site oficial não conecta a conta ao Vereda.
+Os efeitos dependem do módulo nativo `expo-av` incluído a partir do APK 1.1. Atualizar somente o JavaScript de um build anterior não acrescenta áudio. Use o botão **Testar áudio** para identificar a situação no aparelho. O código não pede acesso ao microfone.
 
 ## Primeira instalação no Windows (PowerShell)
 

@@ -8,7 +8,12 @@ import {
   disableDailyReminder,
 } from "@/services/notifications";
 import { Page, Button, Progress, ui, colors } from "@/components/ui";
-import { soundsAvailable, playSound, stopSounds } from "@/services/sounds";
+import {
+  testSound,
+  soundsAvailable,
+  playSound,
+  stopSounds,
+} from "@/services/sounds";
 export default function ProgressScreen() {
   const user = useUserStore();
   const [busy, setBusy] = useState(false);
@@ -148,6 +153,19 @@ export default function ProgressScreen() {
       </View>
       <View style={ui.card}>
         <Text style={ui.heading}>Sons do estudo</Text>
+        <View style={ui.row}>
+          {[0.4, 0.8, 1].map((volume) => (
+            <Button
+              key={volume}
+              secondary={user.soundVolume !== volume}
+              title={`${Math.round(volume * 100)}%`}
+              onPress={() => {
+                useUserStore.setState({ soundVolume: volume });
+                void testSound();
+              }}
+            />
+          ))}
+        </View>
         <Text style={ui.body}>
           Notas suaves para acertos, novas tentativas e conclusão. Sem música
           contínua.
@@ -171,7 +189,7 @@ export default function ProgressScreen() {
             secondary
             disabled={!user.soundsEnabled}
             title="Ouvir exemplo"
-            onPress={() => void playSound("complete")}
+            onPress={() => void testSound()}
           />
         ) : (
           <Text style={ui.small}>
@@ -188,7 +206,7 @@ export default function ProgressScreen() {
           key={b.title}
           style={[
             ui.card,
-            { backgroundColor: b.earned ? colors.pale : colors.white },
+            { backgroundColor: b.earned ? colors.pale : colors.surface },
           ]}
         >
           <Text style={ui.heading}>

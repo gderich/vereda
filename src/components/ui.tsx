@@ -1,14 +1,16 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 export const colors = {
-  paper: "#F7F5EF",
-  ink: "#102D39",
-  muted: "#57676B",
-  green: "#245D64",
-  pale: "#E5EFED",
+  paper: "#0B1D29",
+  ink: "#F5E8C8",
+  muted: "#AEC0C9",
+  green: "#F2C66D",
+  pale: "#213E4B",
   gold: "#E9BC62",
-  line: "#DCDDD4",
+  line: "#35505D",
   white: "#FFFFFF",
+  surface: "#142F3E",
+  night: "#102D39",
 };
 export const ui = StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.paper },
@@ -36,7 +38,7 @@ export const ui = StyleSheet.create({
     color: colors.green,
   },
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 20,
     gap: 12,
@@ -56,22 +58,22 @@ export const ui = StyleSheet.create({
     minHeight: 52,
     alignItems: "center",
     borderBottomWidth: 4,
-    borderBottomColor: "#183F47",
+    borderBottomColor: "#B58A3D",
   },
   buttonText: {
-    color: colors.white,
+    color: colors.night,
     fontSize: 16,
     fontWeight: "700",
     textAlign: "center",
   },
-  secondary: { backgroundColor: colors.pale, borderBottomColor: "#C5D8CB" },
+  secondary: { backgroundColor: colors.pale, borderBottomColor: "#152D37" },
   input: {
     borderWidth: 1,
     borderColor: colors.line,
     borderRadius: 12,
     padding: 16,
     color: colors.ink,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     fontSize: 16,
     minHeight: 120,
     textAlignVertical: "top",
