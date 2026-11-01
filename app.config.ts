@@ -4,7 +4,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Vereda',
   slug: 'vereda-daily-scripture',
-  version: '1.2.0',
+  version: '1.3.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   scheme: 'vereda',
@@ -24,7 +24,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: false,
     bundleIdentifier: 'com.vereda.app',
-    buildNumber: '3',
+    buildNumber: '4',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
       CFBundleLocalizations: ['pt'],
@@ -36,7 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#102D39',
     },
     package: 'com.vereda.app',
-    versionCode: 3,
+    versionCode: 4,
     blockedPermissions: ['android.permission.RECORD_AUDIO'],
     permissions: [
       'android.permission.INTERNET',

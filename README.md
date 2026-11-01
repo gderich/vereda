@@ -2,7 +2,11 @@
 
 Aplicativo pessoal de acompanhamento de leitura das escrituras em português. Expo SDK 51, React Native 0.74.5, React 18.2, TypeScript e Expo Router. Sem login, backend, assinatura ou limite de leituras.
 
-## Versão 1.2 — leitura nativa e prática diária
+## Versão 1.3 — Livro de Mórmon offline
+
+Importe seu exemplar pessoal em **Biblioteca → Mórmon**. Veja [como importar](PERSONAL-SCRIPTURES.md). A importação exige um novo APK. O texto pessoal não acompanha este repositório.
+
+## Leitura e prática diária
 
 - Tema escuro azul profundo com superfícies azuladas, texto creme e detalhes dourados.
 - Bíblia offline nativa: 66 livros, 1.189 capítulos e 31.102 versículos da Almeida Recebida 1.7. Fonte, declaração de domínio público e importador documentados em [BIBLE-SOURCE.md](BIBLE-SOURCE.md). Não é a edição da Igreja.
@@ -13,7 +17,7 @@ Aplicativo pessoal de acompanhamento de leitura das escrituras em português. Ex
 - Seis lições guiadas, reflexões, conquistas, lembrete local e calendário de estudos.
 - Sons normalizados, volume 40/80/100%, botão de teste na tela inicial e diagnóstico de módulo ausente, opção desligada ou falha de reprodução.
 - Marcações e progresso são locais. A Conta da Igreja ainda **não** está conectada; não foi encontrada uma API pública documentada para sincronizar anotações de terceiros. O acesso oficial continua externo.
-- O Livro de Mórmon ainda não tem texto offline incorporado. Sua leitura pode ser registrada a partir do exemplar do usuário; a interface informa a limitação e não apresenta resumos como versículos.
+- Livro de Mórmon offline por importação pessoal: 15 livros, 239 capítulos e 6.604 versículos. O leitor também atende planos e lições.
 
 Os efeitos dependem do módulo nativo `expo-av` incluído a partir do APK 1.1. Atualizar somente o JavaScript de um build anterior não acrescenta áudio. Use o botão **Testar áudio** para identificar a situação no aparelho. O código não pede acesso ao microfone.
 

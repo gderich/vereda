@@ -75,7 +75,7 @@ export default function LessonScreen() {
             onPress={() => setReading(true)}
           />
           <Text style={ui.small}>
-            A Bíblia abre no leitor offline. Para o Livro de Mórmon, use seu exemplar e registre a leitura. Você volta à lição ao fechar.
+            A Bíblia e seu Livro de Mórmon importado abrem no leitor offline. Se ainda não importou seu exemplar, você pode fazer isso na tela de leitura. Ao fechar, você volta à lição.
           </Text>
           <Button title="Já li · Vamos praticar" onPress={() => setStep(0)} />
         </>

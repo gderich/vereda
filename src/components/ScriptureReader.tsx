@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Modal,
   View,
@@ -16,6 +16,8 @@ import { chapterUrl } from "../data/scriptureLinks";
 import { getBook } from "../data/books";
 import { useUserStore } from "../store/userStore";
 import { playSound } from "../services/sounds";
+import { useScriptureStore, loadPersonalScriptures } from "../store/scriptureStore";
+import ScriptureImport from "./ScriptureImport";
 export default function ScriptureReader({
   url,
   title,
@@ -32,9 +34,11 @@ export default function ScriptureReader({
   const [result, setResult] = useState<string | null>(null);
   const ref = useRef<ScrollView>(null);
   const user = useUserStore();
+  const { pack, ready } = useScriptureStore();
+  useEffect(() => { void loadPersonalScriptures(); }, []);
   const book = initial ? getBook(initial.bookId) : undefined;
   const verses =
-    book && book.testament !== "bom" ? getVerses(book.id, chapter) : [];
+    book ? (book.testament === "bom" ? pack?.books[book.id]?.[String(chapter)] || [] : getVerses(book.id, chapter)) : [];
   const sepia = user.readerTheme === "sepia";
   const paper = sepia ? "#F0E3C8" : "#102632",
     ink = sepia ? "#342A20" : "#E7E3D9",
@@ -130,7 +134,7 @@ export default function ScriptureReader({
           {verses.length ? (
             <>
               <Text style={{ color: muted, fontSize: 12 }}>
-                {BIBLE_EDITION}. Toque em um versículo para marcar ou desmarcar.
+                {book?.testament === "bom" ? pack?.edition : BIBLE_EDITION}. Toque em um versículo para marcar ou desmarcar.
               </Text>
               {verses.map((verse, i) => {
                 const key = `${book!.id}:${chapter}:${i + 1}`,
@@ -209,8 +213,7 @@ export default function ScriptureReader({
                 </View>
               )}
               <Text style={{ color: muted, fontSize: 12 }}>
-                Texto: almeidarecebida.org · Almeida Recebida, domínio público
-                segundo o editor. Esta edição difere da edição da Igreja.
+                {book?.testament === "bom" ? "Texto do seu exemplar importado. Notas de rodapé e resumos não fazem parte desta leitura." : "Texto: almeidarecebida.org · Almeida Recebida, domínio público segundo o editor. Esta edição difere da edição da Igreja."}
               </Text>
           <Button secondary title="Abrir na Biblioteca do Evangelho ↗" onPress={()=>{const official=book?chapterUrl(book.id,chapter):null;if(official)Linking.openURL(official).catch(()=>Alert.alert('Não foi possível abrir','Verifique sua conexão.'));}}/>
           <Text style={{color:muted,fontSize:12}}>Suas marcações da Conta da Igreja ficam no serviço oficial. As marcações feitas aqui são locais e não são sincronizadas com ele.</Text>
@@ -218,13 +221,9 @@ export default function ScriptureReader({
           ) : (
             <>
               <Text style={{ color: ink, fontSize: 20, lineHeight: 30 }}>
-                O texto completo desta obra ainda não está incluído offline.
-                Você pode ler no seu exemplar e registrar o capítulo aqui.
+                {!ready && book?.testament === "bom" ? "Carregando seu exemplar…" : "Importe seu exemplar para ler este capítulo offline. Você também pode registrar uma leitura feita fora do app."}
               </Text>
-              <Text style={{ color: muted, lineHeight: 24 }}>
-                Não vamos substituir os versículos por um resumo nem abrir um
-                site dentro da tela de leitura.
-              </Text>
+              {book?.testament === "bom" && <ScriptureImport />}
               <Button
                 secondary
                 title="Abrir fonte oficial fora do app ↗"

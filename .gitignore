@@ -41,3 +41,7 @@ credentials.json
 *service-account*.json
 *.bak
 dist-check/
+
+# Personal scripture imports are device-local, never public source code
+*.vereda.json
+personal-scriptures/

@@ -31,6 +31,7 @@ Module._load = function (id, ...args) {
       Platform: { OS: "android" },
     };
   if (id === "expo-modules-core") return { NativeModulesProxy: {} };
+  if (id === "expo-file-system") return { documentDirectory: "file:///docs/", cacheDirectory: "file:///cache/" };
   if (id === "expo-status-bar") return {StatusBar:"StatusBar"};
   if (id === "expo-web-browser")
     return { openBrowserAsync: async () => ({ type: "dismiss" }) };
@@ -174,4 +175,25 @@ test('Mormon reading identifies absent corpus instead of showing web content',()
  assert.equal(tree.root.findAllByType('WebView').length,0);
  assert.ok(button(tree,'Li no meu exemplar · Registrar'));
  act(()=>tree.unmount());
+});
+test('imported Mormon text supports native reading, bookmarks, font, theme and plan completion',()=>{
+ const {useScriptureStore}=require('../src/store/scriptureStore');
+ const pack={edition:'Exemplar pessoal de teste',books:{'1ne':{'1':['Texto fictício do primeiro versículo.','Texto fictício do segundo versículo.']}}};
+ useScriptureStore.setState({pack,ready:true,error:null});
+ useUserStore.setState({xp:0,readingLog:{},readingDays:{},bookmarks:[],chaptersReadCount:0,readerFont:22,readerTheme:'night'});
+ usePlanStore.setState({userPlans:{},activePlanId:'bom-completo'});
+ const Screen=require('../app/reading/[planId].tsx').default;
+ let tree;act(()=>{tree=Renderer.create(React.createElement(Screen));});
+ act(()=>button(tree,'Ler capítulo no Vereda').props.onPress());
+ assert.equal(tree.root.findAllByType('WebView').length,0);
+ assert.ok(tree.root.findAllByType('Text').some(n=>n.children.includes('Texto fictício do primeiro versículo.')));
+ const verse=tree.root.findAllByType('Pressable').find(n=>n.props.accessibilityLabel?.startsWith('Versículo 1.'));
+ act(()=>verse.props.onPress());assert.ok(useUserStore.getState().bookmarks.includes('1ne:1:1'));
+ act(()=>tree.root.findAllByType('Pressable').find(n=>n.props.accessibilityLabel==='Aumentar fonte').props.onPress());assert.equal(useUserStore.getState().readerFont,24);
+ act(()=>button(tree,'☀ Papel sépia').props.onPress());assert.equal(useUserStore.getState().readerTheme,'sepia');
+ act(()=>button(tree,'Concluir leitura · +15 XP na primeira vez').props.onPress());
+ assert.equal(useUserStore.getState().xp,15);
+ assert.deepEqual(usePlanStore.getState().userPlans['bom-completo'].completedChapters,['1ne:1']);
+ assert.equal(tree.root.findAllByType('Modal').length,0);
+ act(()=>tree.unmount());useScriptureStore.setState({pack:null});
 });

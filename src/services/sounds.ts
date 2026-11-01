@@ -78,7 +78,7 @@ export async function testSound() {
       "O efeito foi reproduzido. Se não ouviu, aumente o volume de mídia do celular e confira se o áudio está saindo por um fone Bluetooth.",
     disabled: "Os sons estão desligados. Ative-os na aba Progresso.",
     unavailable:
-      "Este APK não contém o módulo de áudio. Instale o APK 1.2 gerado pelo atualizador; atualizar apenas o QR Code não acrescenta esse componente.",
+      "Este APK não contém o módulo de áudio. Instale o APK mais recente gerado pelo atualizador; atualizar apenas o QR Code não acrescenta esse componente.",
     interrupted: "Outro som interrompeu o teste. Tente novamente.",
     error:
       "O áudio não pôde ser iniciado. Feche e abra o app; se persistir, instale o novo APK.",

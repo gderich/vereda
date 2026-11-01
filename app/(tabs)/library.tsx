@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, TextInput, Pressable } from "react-native";
 import { Page, Button, ui, colors } from "@/components/ui";
 import { ALL_BOOKS, getBook } from "@/data/books";
 import { chapterUrl } from "@/data/scriptureLinks";
 import ScriptureReader from "@/components/ScriptureReader";
 import { useUserStore } from "@/store/userStore";
+import ScriptureImport from "@/components/ScriptureImport";
+import { useScriptureStore, loadPersonalScriptures } from "@/store/scriptureStore";
 export default function LibraryScreen() {
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<"new" | "old" | "bom" | "saved">("new");
@@ -13,6 +15,8 @@ export default function LibraryScreen() {
     null,
   );
   const user = useUserStore();
+  const pack = useScriptureStore(s => s.pack);
+  useEffect(() => { void loadPersonalScriptures(); }, []);
   function open(id: string, ch: number) {
     const url = chapterUrl(id, ch);
     if (url) setReading({ url, title: `${getBook(id)?.name} ${ch}` });
@@ -115,10 +119,7 @@ export default function LibraryScreen() {
             style={[ui.input, { minHeight: 52 }]}
           />
           {tab === "bom" && (
-            <Text style={ui.small}>
-              Os planos e estudos estão disponíveis. O texto integral do Livro
-              de Mórmon ainda requer seu exemplar ou a fonte oficial externa.
-            </Text>
+            <ScriptureImport />
           )}
           {books.length === 0 && (
             <Text style={ui.body}>Nenhum livro encontrado.</Text>
@@ -138,8 +139,8 @@ export default function LibraryScreen() {
                 </Text>
                 <Text style={ui.small}>
                   {book.chapters} capítulos ·{" "}
-                  {book.testament === "bom"
-                    ? "Registro de leitura"
+                  {book.testament === "bom" && !pack
+                    ? "Importe seu exemplar"
                     : "Disponível offline"}
                 </Text>
               </Pressable>
